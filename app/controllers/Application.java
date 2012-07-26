@@ -55,21 +55,27 @@ public class Application extends Controller {
 
           List<Community> communities = new ArrayList<Community>();
 
-          List<JsonNode> commNodes = jn.findValues("communities_collection");
-          for(JsonNode commNode : commNodes) {
-              List<String> ids = commNode.findValuesAsText("id");
-              List<String> names = commNode.findValuesAsText("name");
+          List<JsonNode> rootNode = jn.findValues("communities_collection");
 
+          if(rootNode.size()>0) {
+              // Have the root
+              JsonNode communityNodes = rootNode.get(0);
+              
+              // Have all nodes, each node is a collection.
 
-              int firstID = Integer.parseInt(ids.get(0));
-              String firstName = names.get(0);
+              for(JsonNode comm : communityNodes) {
+                  List<String> ids = comm.findValuesAsText("id");
+                  List<String> names = comm.findValuesAsText("name");
 
-              Community community = new Community();
-              community.id = (long) firstID;
-              community.name = firstName;
-              communities.add(community);
+                  int firstID = Integer.parseInt(ids.get(0));
+                  String firstName = names.get(0);
+
+                  Community community = new Community();
+                  community.id = (long) firstID;
+                  community.name = firstName;
+                  communities.add(community);
+              }
           }
-
 
           conn.disconnect();
 
