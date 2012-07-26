@@ -1,7 +1,17 @@
-@(message: String)
+@(communities: List[Community], title: String, message: String)
 
-@main("Welcome to Play 2.0") {
-    
-    @play20.welcome(message, style = "Java")
-    
+@main(title) {
+
+    <h1>@communities.size() communities</h1>
+    <ul>
+        @for(community <- communities) {
+            <li>
+                @community.name
+            </li>
+        }
+    </ul>
+    <h2>Add a new community</h2>
+    <hr/>
+    <code>@message</code>
+
 }
