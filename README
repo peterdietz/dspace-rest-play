@@ -1,3 +1,16 @@
+The DSpace REST-API project is cool and all, but I needed a way to kick the tires, and browse the repository, through the API.
+
+Instead of laboring and banging away at JSPUI, XMLUI, osv, to make them interact with the REST interface, I've decided to start from scratch, and teach myself Play! Framework. The goal of this project is to replicate the DSpace browse experience through this UI, using the REST API as the data-source. Not too lofty. Performing the PUT, POST, DELETE actions can come later...
+
+The commit activity is the best indicator of what's been worked on, but here's what works.
+- Top Level Community List
+- Community Page
+
+A very basic start. So essentially, I can view the top-level-communities, add a link there to the community page, and then show its details.
+
+
+
+
 This is your new Play 2.0 application
 =====================================
 
