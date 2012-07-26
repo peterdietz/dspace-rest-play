@@ -6,7 +6,7 @@
     <ul>
         @for(community <- communities) {
             <li>
-                @community.name
+                <a href="community/@community.id">@community.name</a>
             </li>
         }
     </ul>

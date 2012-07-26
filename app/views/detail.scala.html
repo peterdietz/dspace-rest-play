@@ -1,0 +1,35 @@
+@(community: Community, title: String, message: String)
+
+@main(title) {
+
+<h1>@community.name</h1>
+
+@if(community.copyrightText) {
+    <h2>Copyright Text</h2>
+    <p>@Html(community.copyrightText)</p>
+}
+
+
+<h2>Count Items: @community.countItems</h2>
+
+<p>Handle: <a href="http://handle.net/@community.handle">http://handle.net/@community.handle</a></p>
+
+@if(community.introductoryText) {
+    <h2>Introductory Text</h2>
+    <p>@Html(community.introductoryText)</p>
+}
+
+@if(community.shortDescription) {
+    <h2>Short Description</h2>
+    <p>@Html(community.shortDescription)</p>
+}
+
+@if(community.sidebarText) {
+    <h2>Sidebar Text</h2>
+    <p>@Html(community.sidebarText)</p>
+}
+
+<hr/>
+<code>@message</code>
+
+}

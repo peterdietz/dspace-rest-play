@@ -93,4 +93,83 @@ public class Application extends Controller {
 
       return ok("Error");
   }
+
+  public static Result showCommunity(Long id) {
+      StringBuilder sb = new StringBuilder();
+      System.out.println("Why no load?: comm:" + id);
+
+      try {
+          URL url = new URL(baseRestUrl + "communities/" + id.toString() + ".json");
+
+          HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+          conn.setRequestMethod("GET");
+          conn.setRequestProperty("Accept", "application/json");
+
+          if (conn.getResponseCode() != 200) {
+              throw new RuntimeException("Failed : HTTP error code : " + conn.getResponseCode());
+          }
+
+          BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+
+          String output;
+          while ((output = br.readLine()) != null) {
+              sb.append(output);
+
+          }
+
+          JsonNode comm = Json.parse(sb.toString());
+          List<Community> communities = new ArrayList<Community>();
+          Community community = new Community();
+
+          //We have a community in json form. Convert to a model form?
+          if (comm.size() > 0) {
+              community = parseCommunityFromJSON(comm);
+          }
+
+          conn.disconnect();
+
+          return ok(views.html.detail.render(community, "Single Community", sb.toString()));
+
+      } catch (MalformedURLException e) {
+
+          e.printStackTrace();
+
+      } catch (IOException e) {
+
+          e.printStackTrace();
+
+      }
+
+      return ok("Error");
+  }
+
+  private static Community parseCommunityFromJSON(JsonNode communityJSON) {
+    //Other elements include
+    // administrators, canEdit, collections, copyrightText, countItems, handle, id, introductoryText
+    // name, parentCommunity, recentSubmissions, shortDescription, sidebarText, subcommunities
+    // type, entityReference, entityURL, entityId
+
+    List<String> ids = communityJSON.findValuesAsText("id");
+    List<String> names = communityJSON.findValuesAsText("name");
+
+    List<String> copyrightText = communityJSON.findValuesAsText("copyrightText");
+    List<String> countItems = communityJSON.findValuesAsText("countItems");
+    List<String> handle = communityJSON.findValuesAsText("handle");
+    List<String> introductoryText = communityJSON.findValuesAsText("introductoryText");
+    List<String> shortDescription = communityJSON.findValuesAsText("shortDescription");
+    List<String> sidebarText = communityJSON.findValuesAsText("sidebarText");
+
+    Community community = new Community();
+
+    community.id = Long.decode(ids.get(0));
+    community.name = names.get(0);
+    community.copyrightText = copyrightText.get(0);
+    community.countItems = countItems.get(0);
+    community.handle = handle.get(0);
+    community.introductoryText = introductoryText.get(0);
+    community.shortDescription = shortDescription.get(0);
+    community.sidebarText = sidebarText.get(0);
+
+    return community;
+  }
 }

@@ -14,6 +14,8 @@ public class Community {
     public Long id;
     public String name;
 
+    public String copyrightText, countItems, handle, introductoryText, shortDescription, sidebarText;
+
     public static List<Community> all() {
         return new ArrayList<Community>();
     }
