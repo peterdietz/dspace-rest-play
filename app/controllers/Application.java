@@ -30,28 +30,22 @@ public class Application extends Controller {
 
   
   public static Result index() {
-      StringBuilder sb = new StringBuilder();
+      StringBuilder contentString = new StringBuilder();
+      HttpURLConnection conn = null;
+      BufferedReader reader = null;
 
       try {
-          URL url = new URL(baseRestUrl + "communities.json?topLevelOnly=true");
+          conn = connectToURL("communities.json?topLevelOnly=true");
 
-          HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-          conn.setRequestMethod("GET");
-          conn.setRequestProperty("Accept", "application/json");
-
-          if (conn.getResponseCode() != 200) {
-              throw new RuntimeException("Failed : HTTP error code : " + conn.getResponseCode());
-          }
-
-          BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+          reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
 
           String output;
-          while ((output = br.readLine()) != null) {
-              sb.append(output);
+          while ((output = reader.readLine()) != null) {
+              contentString.append(output);
 
           }
 
-          JsonNode jn = Json.parse(sb.toString());
+          JsonNode jn = Json.parse(contentString.toString());
 
           List<Community> communities = new ArrayList<Community>();
 
@@ -60,87 +54,77 @@ public class Application extends Controller {
           if(rootNode.size()>0) {
               // Have the root
               JsonNode communityNodes = rootNode.get(0);
-              
-              // Have all nodes, each node is a collection.
 
               for(JsonNode comm : communityNodes) {
-                  List<String> ids = comm.findValuesAsText("id");
-                  List<String> names = comm.findValuesAsText("name");
-
-                  int firstID = Integer.parseInt(ids.get(0));
-                  String firstName = names.get(0);
-
-                  Community community = new Community();
-                  community.id = (long) firstID;
-                  community.name = firstName;
+                  Community community = parseCommunityFromJSON(comm);
                   communities.add(community);
               }
           }
 
           conn.disconnect();
 
-          return ok(views.html.index.render(communities, "Top Level Communities", sb.toString()));
+          return ok(views.html.index.render(communities, "Top Level Communities", contentString.toString()));
 
       } catch (MalformedURLException e) {
-
-          e.printStackTrace();
-
+          return badRequest("MalformedURLException: " + e.getMessage());
       } catch (IOException e) {
+          return internalServerError("IOException :" + e.getMessage());
+      } finally {
 
-          e.printStackTrace();
+          if (reader != null) {
+              try {
+                  reader.close();
+              } catch (IOException e) {
+              }
+          }
 
+          if (conn != null) {
+              conn.disconnect();
+          }
       }
-
-      return ok("Error");
   }
 
   public static Result showCommunity(Long id) {
-      StringBuilder sb = new StringBuilder();
-      System.out.println("Why no load?: comm:" + id);
+      StringBuilder contentString = new StringBuilder();
+      HttpURLConnection conn = null;
+      BufferedReader reader = null;
 
       try {
-          URL url = new URL(baseRestUrl + "communities/" + id.toString() + ".json");
+          conn = connectToURL("communities/" + id.toString() + ".json");
 
-          HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-          conn.setRequestMethod("GET");
-          conn.setRequestProperty("Accept", "application/json");
-
-          if (conn.getResponseCode() != 200) {
-              throw new RuntimeException("Failed : HTTP error code : " + conn.getResponseCode());
-          }
-
-          BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+          reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
 
           String output;
-          while ((output = br.readLine()) != null) {
-              sb.append(output);
-
+          while ((output = reader.readLine()) != null) {
+              contentString.append(output);
           }
 
-          JsonNode comm = Json.parse(sb.toString());
-          List<Community> communities = new ArrayList<Community>();
+          JsonNode comm = Json.parse(contentString.toString());
           Community community = new Community();
 
-          //We have a community in json form. Convert to a model form?
           if (comm.size() > 0) {
               community = parseCommunityFromJSON(comm);
           }
 
-          conn.disconnect();
-
-          return ok(views.html.detail.render(community, "Single Community", sb.toString()));
-
+          return ok(views.html.detail.render(community, "Single Community", contentString.toString()));
+          
       } catch (MalformedURLException e) {
-
-          e.printStackTrace();
-
+          return badRequest(e.getMessage());
       } catch (IOException e) {
+          return internalServerError(e.getMessage());
+      } finally {
 
-          e.printStackTrace();
+          if (reader != null) {
+              try {
+                  reader.close();
+              } catch (IOException e) {
+              }
+          }
 
+          if (conn != null) {
+              conn.disconnect();
+          }
       }
-
-      return ok("Error");
   }
 
   private static Community parseCommunityFromJSON(JsonNode communityJSON) {
@@ -172,4 +156,19 @@ public class Application extends Controller {
 
     return community;
   }
+    
+    private static HttpURLConnection connectToURL(String endpoint) throws IOException {
+        HttpURLConnection conn;
+        URL url = new URL(baseRestUrl + endpoint);
+
+        conn = (HttpURLConnection) url.openConnection();
+        conn.setRequestMethod("GET");
+        conn.setRequestProperty("Accept", "application/json");
+
+        if (conn.getResponseCode() != 200) {
+            throw new MalformedURLException("Non-200 response: " + conn.getResponseMessage());
+        }
+
+        return conn;
+    }
 }
