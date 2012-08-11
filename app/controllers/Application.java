@@ -133,7 +133,9 @@ public class Application extends Controller {
     // name, parentCommunity, recentSubmissions, shortDescription, sidebarText, subcommunities
     // type, entityReference, entityURL, entityId
 
-    List<String> ids = communityJSON.findValuesAsText("id");
+      Community community = new Community();
+      community.id = Long.decode(communityJSON.get("id").toString());
+
     List<String> names = communityJSON.findValuesAsText("name");
 
     List<String> copyrightText = communityJSON.findValuesAsText("copyrightText");
@@ -143,9 +145,7 @@ public class Application extends Controller {
     List<String> shortDescription = communityJSON.findValuesAsText("shortDescription");
     List<String> sidebarText = communityJSON.findValuesAsText("sidebarText");
 
-    Community community = new Community();
 
-    community.id = Long.decode(ids.get(0));
     community.name = names.get(0);
     community.copyrightText = copyrightText.get(0);
     community.countItems = countItems.get(0);
