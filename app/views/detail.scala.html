@@ -29,6 +29,14 @@
     <p>@Html(community.sidebarText)</p>
 }
 
+@if(community.subCommunities.length > 0) {
+    <h2>Communities within this Community</h2>
+    <ul>
+    @for(subCommunity <- community.subCommunities) {
+        <li><a href="/community/@subCommunity">Community ID: @subCommunity</a></li>
+    }
+    </ul>
+}
 <hr/>
 <code>@message</code>
 

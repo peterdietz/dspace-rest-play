@@ -145,6 +145,10 @@ public class Application extends Controller {
     List<String> shortDescription = communityJSON.findValuesAsText("shortDescription");
     List<String> sidebarText = communityJSON.findValuesAsText("sidebarText");
 
+      JsonNode subCommNodes = communityJSON.get("subCommunities");
+      for(JsonNode subComm : subCommNodes) {
+          community.subCommunities.add(subComm.get("id").asInt());
+      }
 
     community.name = names.get(0);
     community.copyrightText = copyrightText.get(0);
