@@ -150,6 +150,11 @@ public class Application extends Controller {
           community.subCommunities.add(subComm.get("id").asInt());
       }
 
+      JsonNode subCollNodes = communityJSON.get("collections");
+      for(JsonNode subColl : subCollNodes) {
+          community.collections.add(subColl.get("id").asInt());
+      }
+
     community.name = names.get(0);
     community.copyrightText = copyrightText.get(0);
     community.countItems = countItems.get(0);

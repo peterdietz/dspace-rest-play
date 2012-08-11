@@ -37,6 +37,15 @@
     }
     </ul>
 }
+
+@if(community.collections.length > 0) {
+<h2>Collections within this Community</h2>
+<ul>
+    @for(collectionID <- community.collections) {
+    <li><a href="/collection/@collectionID">Collection ID: @collectionID</a></li>
+    }
+</ul>
+}
 <hr/>
 <code>@message</code>
 

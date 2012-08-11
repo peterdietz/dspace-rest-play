@@ -13,7 +13,9 @@ import java.util.List;
 public class Community {
     public Long id;
     public String name;
+    
     public List<Integer> subCommunities = new ArrayList<Integer>();
+    public List<Integer> collections = new ArrayList<Integer>();
 
     public String copyrightText, countItems, handle, introductoryText, shortDescription, sidebarText;
 
