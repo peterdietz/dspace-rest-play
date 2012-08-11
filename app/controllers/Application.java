@@ -1,5 +1,6 @@
 package controllers;
 
+import models.Collection;
 import models.Community;
 import org.codehaus.jackson.map.annotate.JacksonStdImpl;
 import play.*;
@@ -127,6 +128,49 @@ public class Application extends Controller {
       }
   }
 
+    public static Result showCollection(Long id) {
+        StringBuilder contentString = new StringBuilder();
+        HttpURLConnection conn = null;
+        BufferedReader reader = null;
+
+        try {
+            conn = connectToURL("collections/" + id.toString() + ".json");
+
+            reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+
+            String output;
+            while ((output = reader.readLine()) != null) {
+                contentString.append(output);
+            }
+
+            JsonNode collNode = Json.parse(contentString.toString());
+            Collection collection = new Collection();
+
+            if (collNode.size() > 0) {
+                collection = parseCollectionFromJSON(collNode);
+            }
+
+            return ok(views.html.collection.detail.render(collection, "Single Collection", contentString.toString()));
+
+        } catch (MalformedURLException e) {
+            return badRequest(e.getMessage());
+        } catch (IOException e) {
+            return internalServerError(e.getMessage());
+        } finally {
+
+            if (reader != null) {
+                try {
+                    reader.close();
+                } catch (IOException e) {
+                }
+            }
+
+            if (conn != null) {
+                conn.disconnect();
+            }
+        }
+    }
+
   private static Community parseCommunityFromJSON(JsonNode communityJSON) {
     //Other elements include
     // administrators, canEdit, collections, copyrightText, countItems, handle, id, introductoryText
@@ -165,6 +209,53 @@ public class Application extends Controller {
 
     return community;
   }
+
+    private static Collection parseCollectionFromJSON(JsonNode collectionJSON) {
+        /*communities list
+        copyrightText
+                countItems
+        handle
+                id
+        introText
+        items list ids
+                license
+        logo
+                name
+        provenance
+                shortDescription
+        sidebarText
+                type
+        entityReference, entityURL, entityId
+          */
+
+        Collection collection = new Collection();
+
+        collection.id = collectionJSON.get("id").asLong();
+        collection.name = collectionJSON.get("name").asText();
+
+        collection.copyrightText = collectionJSON.get("copyrightText").asText();
+        collection.countItems = collectionJSON.get("countItems").asInt();
+        collection.handle = collectionJSON.get("handle").asText();
+
+        //@TODO Is it comm.introductoryText and coll.introText ?
+        collection.introText = collectionJSON.get("introText").asText();
+        collection.shortDescription = collectionJSON.get("shortDescription").asText();
+        collection.sidebarText = collectionJSON.get("sidebarText").asText();
+
+        //Not sure what communities means for an item. Its parents?
+        JsonNode commNodes = collectionJSON.get("communities");
+        for(JsonNode comm : commNodes) {
+            collection.communities.add(comm.get("id").asInt());
+        }
+
+        JsonNode itemNodes = collectionJSON.get("items");
+        for(JsonNode item : itemNodes) {
+            collection.items.add(item.get("id").asInt());
+        }
+
+
+        return collection;
+    }
     
     private static HttpURLConnection connectToURL(String endpoint) throws IOException {
         HttpURLConnection conn;

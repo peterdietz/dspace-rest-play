@@ -8,5 +8,9 @@ GET     /                           controllers.Application.index()
 # View a community
 GET     /community/:id              controllers.Application.showCommunity(id: Long)
 
+# View a collection
+GET     /collection/:id              controllers.Application.showCollection(id: Long)
+
+
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.at(path="/public", file)

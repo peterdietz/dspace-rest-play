@@ -1,0 +1,52 @@
+@(collection: models.Collection, title: String, message: String)
+
+@main(title) {
+
+<h1>@collection.name</h1>
+
+@if(collection.copyrightText) {
+<h2>Copyright Text</h2>
+<p>@Html(collection.copyrightText)</p>
+}
+
+
+<h2>Count Items: @collection.countItems</h2>
+
+<p>Handle: <a href="http://handle.net/@collection.handle">http://handle.net/@collection.handle</a></p>
+
+@if(collection.introText) {
+<h2>Introductory Text</h2>
+<p>@Html(collection.introText)</p>
+}
+
+@if(collection.shortDescription) {
+<h2>Short Description</h2>
+<p>@Html(collection.shortDescription)</p>
+}
+
+@if(collection.sidebarText) {
+<h2>Sidebar Text</h2>
+<p>@Html(collection.sidebarText)</p>
+}
+
+@if(collection.communities.length > 0) {
+<h2>Parent Communities of this Collection</h2>
+<ul>
+    @for(communityID <- collection.communities) {
+    <li><a href="/community/@communityID">Community ID: @communityID</a></li>
+    }
+</ul>
+}
+
+@if(collection.items.length > 0) {
+<h2>Items in this Collection (@collection.countItems)</h2>
+<ul>
+    @for(itemID <- collection.items) {
+    <li><a href="/items/@itemID">Item ID: @itemID</a></li>
+    }
+</ul>
+}
+<hr/>
+<code>@message</code>
+
+}
