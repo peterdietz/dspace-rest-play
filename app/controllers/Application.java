@@ -2,6 +2,8 @@ package controllers;
 
 import models.Collection;
 import models.Community;
+import models.Item;
+import models.MetadataField;
 import org.codehaus.jackson.map.annotate.JacksonStdImpl;
 import play.*;
 import play.api.templates.Html;
@@ -171,6 +173,51 @@ public class Application extends Controller {
         }
     }
 
+    public static Result showItem(Long id) {
+        StringBuilder contentString = new StringBuilder();
+        HttpURLConnection conn = null;
+        BufferedReader reader = null;
+
+        try {
+            conn = connectToURL("items/" + id.toString() + ".json");
+
+            reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+
+
+
+            String output;
+            while ((output = reader.readLine()) != null) {
+                contentString.append(output);
+            }
+
+            JsonNode node = Json.parse(contentString.toString());
+            Item item = new Item();
+
+            if (node.size() > 0) {
+               item = parseItemFromJSON(node);
+            }
+
+            return ok(views.html.item.detail.render(item, "Single Item", contentString.toString()));
+
+        } catch (MalformedURLException e) {
+            return badRequest(e.getMessage());
+        } catch (IOException e) {
+            return internalServerError(e.getMessage());
+        } finally {
+
+            if (reader != null) {
+                try {
+                    reader.close();
+                } catch (IOException e) {
+                }
+            }
+
+            if (conn != null) {
+                conn.disconnect();
+            }
+        }
+    }
+
   private static Community parseCommunityFromJSON(JsonNode communityJSON) {
     //Other elements include
     // administrators, canEdit, collections, copyrightText, countItems, handle, id, introductoryText
@@ -255,6 +302,40 @@ public class Application extends Controller {
 
 
         return collection;
+    }
+
+    private static Item parseItemFromJSON(JsonNode itemNode) {
+        Item item = new Item();
+
+        item.id = itemNode.get("id").asLong();
+        item.name = itemNode.get("name").asText();
+
+        item.handle = itemNode.get("handle").asText();
+        
+        item.isArchived = itemNode.get("isArchived").asBoolean();
+        item.isWithdrawn = itemNode.get("isWithdrawn").asBoolean();
+        
+        item.submitterFullName = itemNode.get("submitter").get("fullName").asText();
+
+        JsonNode metadataNodes = itemNode.get("metadata");
+        for(JsonNode metadata : metadataNodes) {
+            String schema = metadata.get("schema").asText();
+            String element = metadata.get("element").asText();
+            String qualifier = metadata.get("qualifier").asText();
+            String value = metadata.get("value").asText();
+
+            MetadataField field = new MetadataField(schema, element, qualifier, value);
+            
+            item.metadata.add(field);
+        }
+        
+        JsonNode collectionNodes = itemNode.get("collections");
+        for(JsonNode collectionNode : collectionNodes) {
+            Collection collection = parseCollectionFromJSON(collectionNode);
+            item.collections.add(collection);
+        }
+
+        return item;
     }
     
     private static HttpURLConnection connectToURL(String endpoint) throws IOException {

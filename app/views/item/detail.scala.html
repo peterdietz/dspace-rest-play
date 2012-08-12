@@ -1,0 +1,32 @@
+@(item: models.Item, title: String, message: String)
+
+@main(title) {
+
+<h1>@item.name</h1>
+
+<p>Handle: <a href="http://handle.net/@item.handle">http://handle.net/@item.handle</a></p>
+
+@if(item.isArchived) {
+    <p>Archival Status: In Archive</p>
+} else {
+    <p>Archival Status: Not yet in archive.</p>
+}
+
+@if(item.isWithdrawn) {
+    <p>Item has been withdrawn from the repository.</p>
+}
+
+
+@if(item.metadata.length > 0) {
+<h2>Metadata of this Item</h2>
+<ul>
+    @for(metadataField <- item.metadata) {
+    <li>@metadataField</li>
+    }
+</ul>
+}
+
+<hr/>
+<code>@message</code>
+
+}
