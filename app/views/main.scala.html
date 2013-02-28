@@ -58,7 +58,20 @@
             @content
 
             <hr/>
+            <div class="accordion" id="accordion2">
+                <div class="accordion-group">
+                    <div class="accordion-heading">
+                        <a class="accordion-toggle btn btn-info" data-toggle="collapse" data-parent="#accordion2" href="#collapseOne">
+                            View RAW JSON
+                        </a>
+                    </div>
+                    <div id="collapseOne" class="accordion-body collapse">
+                        <div class="accordion-inner">
                             <code>@message</code>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <!-- Example row of columns -->
