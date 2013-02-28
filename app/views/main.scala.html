@@ -1,4 +1,4 @@
-@(title: String)(content: Html)
+@(title: String, message: String)(content: Html)
 
 <!DOCTYPE html>
 
@@ -56,7 +56,9 @@
         <!-- Main hero unit for a primary marketing message or call to action -->
         <div class="hero-unit">
             @content
-            <p><a class="btn btn-primary btn-large">Learn more &raquo;</a></p>
+
+            <hr/>
+                            <code>@message</code>
         </div>
 
         <!-- Example row of columns -->
