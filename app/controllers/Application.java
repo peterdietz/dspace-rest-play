@@ -29,7 +29,8 @@ import javax.swing.text.html.HTML;
 
 
 public class Application extends Controller {
-    private static String baseRestUrl = "http://localhost:8280/rest/";
+    //private static String baseRestUrl = "http://localhost:8280/rest/";
+  private static String baseRestUrl = "http://demo.dspace.org/rest-hedtek/";
 
   
   public static Result index() {
