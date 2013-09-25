@@ -4,14 +4,10 @@ import models.Collection;
 import models.Community;
 import models.Item;
 import models.MetadataField;
-import org.codehaus.jackson.map.annotate.JacksonStdImpl;
-import play.*;
-import play.api.templates.Html;
-import play.mvc.*;
+import org.codehaus.jackson.JsonNode;
 import play.libs.Json;
-
-import views.html.*;
-import views.html.index;
+import play.mvc.Controller;
+import play.mvc.Result;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -22,14 +18,9 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.codehaus.jackson.JsonNode;
-import views.html.main;
-
-import javax.swing.text.html.HTML;
-
 
 public class Application extends Controller {
-  private static String baseRestUrl = "http://demo.dspace.org/rest-hedtek/";
+  private static String baseRestUrl = "http://localhost:8080/rest/";
 
   
   public static Result index() {
@@ -38,7 +29,7 @@ public class Application extends Controller {
       BufferedReader reader = null;
 
       try {
-          conn = connectToURL("communities.json?topLevelOnly=true");
+          conn = connectToURL("communities");
 
           reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
 
@@ -52,13 +43,15 @@ public class Application extends Controller {
 
           List<Community> communities = new ArrayList<Community>();
 
-          List<JsonNode> rootNode = jn.findValues("communities_collection");
 
-          if(rootNode.size()>0) {
+
+          //List<JsonNode> rootNode = jn.findValues("");
+
+          if(jn.size()>0) {
               // Have the root
-              JsonNode communityNodes = rootNode.get(0);
+              //JsonNode communityNodes = rootNode.get(0);
 
-              for(JsonNode comm : communityNodes) {
+              for(JsonNode comm : jn) {
                   Community community = parseCommunityFromJSON(comm);
                   communities.add(community);
               }
@@ -225,7 +218,7 @@ public class Application extends Controller {
     // type, entityReference, entityURL, entityId
 
       Community community = new Community();
-      community.id = Long.decode(communityJSON.get("id").toString());
+      community.id = Long.decode(communityJSON.get("communityID").toString());
 
     List<String> names = communityJSON.findValuesAsText("name");
 
@@ -236,6 +229,7 @@ public class Application extends Controller {
     List<String> shortDescription = communityJSON.findValuesAsText("shortDescription");
     List<String> sidebarText = communityJSON.findValuesAsText("sidebarText");
 
+      /*
       JsonNode subCommNodes = communityJSON.get("subCommunities");
       for(JsonNode subComm : subCommNodes) {
           community.subCommunities.add(subComm.get("id").asInt());
@@ -244,15 +238,15 @@ public class Application extends Controller {
       JsonNode subCollNodes = communityJSON.get("collections");
       for(JsonNode subColl : subCollNodes) {
           community.collections.add(subColl.get("id").asInt());
-      }
+      } */
 
     community.name = names.get(0);
-    community.copyrightText = copyrightText.get(0);
-    community.countItems = countItems.get(0);
+    //community.copyrightText = copyrightText.get(0);
+    //community.countItems = countItems.get(0);
     community.handle = handle.get(0);
-    community.introductoryText = introductoryText.get(0);
-    community.shortDescription = shortDescription.get(0);
-    community.sidebarText = sidebarText.get(0);
+    //community.introductoryText = introductoryText.get(0);
+    //community.shortDescription = shortDescription.get(0);
+    //community.sidebarText = sidebarText.get(0);
 
     return community;
   }
