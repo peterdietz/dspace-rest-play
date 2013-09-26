@@ -36,30 +36,23 @@ public class Application extends Controller {
           String output;
           while ((output = reader.readLine()) != null) {
               contentString.append(output);
-
           }
 
-          JsonNode jn = Json.parse(contentString.toString());
+          JsonNode jsonNode = Json.parse(contentString.toString());
 
           List<Community> communities = new ArrayList<Community>();
 
-
-
-          //List<JsonNode> rootNode = jn.findValues("");
-
-          if(jn.size()>0) {
-              // Have the root
-              //JsonNode communityNodes = rootNode.get(0);
-
-              for(JsonNode comm : jn) {
+          if(jsonNode.size()>0) {
+              for(JsonNode comm : jsonNode) {
                   Community community = parseCommunityFromJSON(comm);
                   communities.add(community);
               }
           }
 
+          String endpoint = conn.getURL().toString();
           conn.disconnect();
 
-          return ok(views.html.index.render(communities, "Top Level Communities", contentString.toString()));
+          return ok(views.html.index.render(communities, "Top Level Communities", contentString.toString(), endpoint));
 
       } catch (MalformedURLException e) {
           return badRequest("MalformedURLException: " + e.getMessage());
@@ -86,7 +79,7 @@ public class Application extends Controller {
       BufferedReader reader = null;
 
       try {
-          conn = connectToURL("communities/" + id.toString() + ".json");
+          conn = connectToURL("communities/" + id.toString());
 
           reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
 
@@ -102,7 +95,9 @@ public class Application extends Controller {
               community = parseCommunityFromJSON(comm);
           }
 
-          return ok(views.html.detail.render(community, "Single Community", contentString.toString()));
+          String endpoint = conn.getURL().toString();
+
+          return ok(views.html.detail.render(community, "Single Community", contentString.toString(), endpoint));
           
       } catch (MalformedURLException e) {
           return badRequest(e.getMessage());
@@ -145,7 +140,8 @@ public class Application extends Controller {
                 collection = parseCollectionFromJSON(collNode);
             }
 
-            return ok(views.html.collection.detail.render(collection, "Single Collection", contentString.toString()));
+            String endpoint = conn.getURL().toString();
+            return ok(views.html.collection.detail.render(collection, "Single Collection", contentString.toString(), endpoint));
 
         } catch (MalformedURLException e) {
             return badRequest(e.getMessage());
@@ -190,7 +186,8 @@ public class Application extends Controller {
                item = parseItemFromJSON(node);
             }
 
-            return ok(views.html.item.detail.render(item, "Single Item", contentString.toString()));
+            String endpoint = conn.getURL().toString();
+            return ok(views.html.item.detail.render(item, "Single Item", contentString.toString(), endpoint));
 
         } catch (MalformedURLException e) {
             return badRequest(e.getMessage());
@@ -331,7 +328,8 @@ public class Application extends Controller {
 
         return item;
     }
-    
+
+
     private static HttpURLConnection connectToURL(String endpoint) throws IOException {
         HttpURLConnection conn;
         URL url = new URL(baseRestUrl + endpoint);
