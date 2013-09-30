@@ -79,7 +79,7 @@ public class Application extends Controller {
       BufferedReader reader = null;
 
       try {
-          conn = connectToURL("communities/" + id.toString());
+          conn = connectToURL("communities/" + id.toString() + "?expand=all");
 
           reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
 
@@ -226,24 +226,47 @@ public class Application extends Controller {
     List<String> shortDescription = communityJSON.findValuesAsText("shortDescription");
     List<String> sidebarText = communityJSON.findValuesAsText("sidebarText");
 
-      /*
-      JsonNode subCommNodes = communityJSON.get("subCommunities");
-      for(JsonNode subComm : subCommNodes) {
-          community.subCommunities.add(subComm.get("id").asInt());
+
+      JsonNode subCommNodes = communityJSON.get("subcommunities");
+      if(subCommNodes != null) {
+
+          for(JsonNode subComm : subCommNodes) {
+              if(! subComm.get("communityID").isNull()) {
+                community.subCommunities.add(parseCommunityFromJSON(subComm));
+              }
+          }
       }
 
       JsonNode subCollNodes = communityJSON.get("collections");
-      for(JsonNode subColl : subCollNodes) {
-          community.collections.add(subColl.get("id").asInt());
-      } */
+      if(subCollNodes != null) {
+          for(JsonNode subColl : subCollNodes) {
+              community.collections.add(subColl.get("collectionID").asInt());
+          }
+      }
 
-    community.name = names.get(0);
-    //community.copyrightText = copyrightText.get(0);
-    //community.countItems = countItems.get(0);
-    community.handle = handle.get(0);
-    //community.introductoryText = introductoryText.get(0);
-    //community.shortDescription = shortDescription.get(0);
-    //community.sidebarText = sidebarText.get(0);
+
+      community.name = names.get(0);
+      community.handle = handle.get(0);
+
+      if(! copyrightText.isEmpty()) {
+          community.copyrightText = copyrightText.get(0);
+      }
+
+      if(! countItems.isEmpty()) {
+          community.countItems = countItems.get(0);
+      }
+
+      if(! introductoryText.isEmpty()) {
+          community.introductoryText = introductoryText.get(0);
+      }
+
+      if(! shortDescription.isEmpty()) {
+          community.shortDescription = shortDescription.get(0);
+      }
+
+      if(! sidebarText.isEmpty()) {
+          community.sidebarText = sidebarText.get(0);
+      }
 
     return community;
   }
@@ -268,8 +291,9 @@ public class Application extends Controller {
 
         Collection collection = new Collection();
 
-        collection.id = collectionJSON.get("id").asLong();
-        collection.name = collectionJSON.get("name").asText();
+        collection.id = collectionJSON.get("collectionID").asLong();
+        List<String> names = collectionJSON.findValuesAsText("name");
+        collection.name = names.get(0);
 
         collection.copyrightText = collectionJSON.get("copyrightText").asText();
         collection.countItems = collectionJSON.get("countItems").asInt();
@@ -283,12 +307,12 @@ public class Application extends Controller {
         //Not sure what communities means for an item. Its parents?
         JsonNode commNodes = collectionJSON.get("communities");
         for(JsonNode comm : commNodes) {
-            collection.communities.add(comm.get("id").asInt());
+            collection.communities.add(comm.get("communityID").asInt());
         }
 
         JsonNode itemNodes = collectionJSON.get("items");
         for(JsonNode item : itemNodes) {
-            collection.items.add(item.get("id").asInt());
+            collection.items.add(item.get("itemID").asInt());
         }
 
 

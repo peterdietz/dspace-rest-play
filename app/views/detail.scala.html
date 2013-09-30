@@ -33,7 +33,7 @@
     <h2>Communities within this Community</h2>
     <ul>
     @for(subCommunity <- community.subCommunities) {
-        <li><a href="/community/@subCommunity">Community ID: @subCommunity</a></li>
+        <li><a href="/community/@subCommunity.id">@(subCommunity.name)</a></li>
     }
     </ul>
 }
