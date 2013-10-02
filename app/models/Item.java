@@ -24,6 +24,8 @@ public class Item {
     public String name;
     public List<MetadataField> metadata = new ArrayList<MetadataField>();
 
+    public List<Bitstream> bitstreams  = new ArrayList<Bitstream>();
+
     public String handle;
     public boolean isArchived, isWithdrawn;
     public String submitterFullName;

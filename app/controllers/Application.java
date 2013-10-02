@@ -1,9 +1,6 @@
 package controllers;
 
-import models.Collection;
-import models.Community;
-import models.Item;
-import models.MetadataField;
+import models.*;
 import org.codehaus.jackson.JsonNode;
 import play.libs.Json;
 import play.mvc.Controller;
@@ -362,6 +359,7 @@ public class Application extends Controller {
             JsonNode metadataNode = itemNode.get("metadata");
             if(metadataNode.has("fields")) {
                 JsonNode fields = metadataNode.get("fields");
+                //TODO parseMetadataFieldFromJSON
                 item.metadata = new ArrayList<MetadataField>();
 
                 for(JsonNode field : fields) {
@@ -369,6 +367,15 @@ public class Application extends Controller {
                     String value = field.get("value").asText();
                     item.metadata.add(new MetadataField(key, value));
                 }
+            }
+        }
+
+        if(itemNode.has("bitstreams")) {
+            item.bitstreams = new ArrayList<Bitstream>();
+            JsonNode bitstreamsNode = itemNode.get("bitstreams");
+            for(JsonNode bitstreamNode : bitstreamsNode) {
+                Bitstream bitstream = parseBitstreamFromJSON(bitstreamNode);
+                item.bitstreams.add(bitstream);
             }
         }
 
@@ -381,6 +388,17 @@ public class Application extends Controller {
         }
 
         return item;
+    }
+
+    private static Bitstream parseBitstreamFromJSON(JsonNode bitstreamNode) {
+        Bitstream bitstream = new Bitstream();
+        bitstream.name = bitstreamNode.get("name").asText();
+        bitstream.description = bitstreamNode.get("description").asText();
+        bitstream.format = bitstreamNode.get("format").asText();
+        bitstream.bundleName = bitstreamNode.get("bundleName").asText();
+        bitstream.sizeBytes = bitstreamNode.get("sizeBytes").asText();
+
+        return bitstream;
     }
 
 

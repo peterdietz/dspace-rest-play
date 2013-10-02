@@ -29,5 +29,14 @@
 </dl>
 }
 
+@if(item.bitstreams.size > 0) {
+<h2>Bitstreams</h2>
+<ul>
+    @for(bitstream <- item.bitstreams) {
+        <li>@bitstream.bundleName - @bitstream.name [@bitstream.description, @bitstream.format,  @bitstream.sizeBytes]</li>
+    }
+</ul>
+}
+
 
 }
