@@ -22,7 +22,8 @@ public class Item {
     
     public Long id;
     public String name;
-    public List metadata = new ArrayList<MetadataField>();
+    public List<MetadataField> metadata = new ArrayList<MetadataField>();
+
     public String handle;
     public boolean isArchived, isWithdrawn;
     public String submitterFullName;

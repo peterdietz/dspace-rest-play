@@ -17,13 +17,16 @@
 }
 
 
-@if(item.metadata.length > 0) {
+@if(item.metadata.size > 0) {
 <h2>Metadata of this Item</h2>
-<ul>
+<dl>
     @for(metadataField <- item.metadata) {
-    <li>@metadataField</li>
+      <dt>@metadataField.key</dt>
+      <dd>@metadataField.value</dd>
+
+
     }
-</ul>
+</dl>
 }
 
 

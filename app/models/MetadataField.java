@@ -8,17 +8,16 @@ package models;
  * To change this template use File | Settings | File Templates.
  */
 public class MetadataField {
-    public String schema, element, qualifier, value;
+    public String key, value;
     
-    public MetadataField(String schema, String element, String qualifier, String value) {
-        this.schema = schema;
-        this.element = element;
-        this.qualifier = qualifier;
+    public MetadataField(String key, String value) {
+        this.key = key;
         this.value = value;
     }
     
     public String getKey() {
-        return schema + "." + element + ((qualifier != null) ? "." + qualifier : "");
+        return key;
+        //return schema + "." + element + ((qualifier != null) ? "." + qualifier : "");
     }
     
     public String getValue() {

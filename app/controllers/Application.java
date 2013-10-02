@@ -168,7 +168,7 @@ public class Application extends Controller {
         BufferedReader reader = null;
 
         try {
-            conn = connectToURL("items/" + id.toString() + ".json");
+            conn = connectToURL("items/" + id.toString() + "?expand=all");
 
             reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
 
@@ -359,16 +359,16 @@ public class Application extends Controller {
         //item.submitterFullName = itemNode.get("submitter").get("fullName").asText();
 
         if(itemNode.has("metadata")) {
-            JsonNode metadataNodes = itemNode.findValue("metadata");
-            for(JsonNode metadata : metadataNodes) {
-                String schema = metadata.get("schema").asText();
-                String element = metadata.get("element").asText();
-                String qualifier = metadata.get("qualifier").asText();
-                String value = metadata.get("value").asText();
+            JsonNode metadataNode = itemNode.get("metadata");
+            if(metadataNode.has("fields")) {
+                JsonNode fields = metadataNode.get("fields");
+                item.metadata = new ArrayList<MetadataField>();
 
-                MetadataField field = new MetadataField(schema, element, qualifier, value);
-
-                item.metadata.add(field);
+                for(JsonNode field : fields) {
+                    String key = field.get("key").asText();
+                    String value = field.get("value").asText();
+                    item.metadata.add(new MetadataField(key, value));
+                }
             }
         }
 
