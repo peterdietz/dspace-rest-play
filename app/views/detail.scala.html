@@ -41,8 +41,8 @@
 @if(community.collections.length > 0) {
 <h2>Collections within this Community</h2>
 <ul>
-    @for(collectionID <- community.collections) {
-    <li><a href="/collection/@collectionID">Collection ID: @collectionID</a></li>
+    @for(collection <- community.collections) {
+    <li><a href="/collection/@collection.id">@collection.name</a></li>
     }
 </ul>
 }

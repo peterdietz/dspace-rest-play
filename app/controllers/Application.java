@@ -124,7 +124,7 @@ public class Application extends Controller {
         BufferedReader reader = null;
 
         try {
-            conn = connectToURL("collections/" + id.toString() + ".json");
+            conn = connectToURL("collections/" + id.toString() + "?expand=all");
 
             reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
 
@@ -240,7 +240,7 @@ public class Application extends Controller {
       JsonNode subCollNodes = communityJSON.get("collections");
       if(subCollNodes != null) {
           for(JsonNode subColl : subCollNodes) {
-              community.collections.add(subColl.get("collectionID").asInt());
+              community.collections.add(parseCollectionFromJSON(subColl));
           }
       }
 
@@ -295,24 +295,49 @@ public class Application extends Controller {
         List<String> names = collectionJSON.findValuesAsText("name");
         collection.name = names.get(0);
 
-        collection.copyrightText = collectionJSON.get("copyrightText").asText();
-        collection.countItems = collectionJSON.get("countItems").asInt();
+        //List<String> handle = collectionJSON.findValuesAsText("handle");
         collection.handle = collectionJSON.get("handle").asText();
 
+        List<String> copyrightText = collectionJSON.findValuesAsText("copyrightText");
+        if(! copyrightText.isEmpty()) {
+            collection.copyrightText = collectionJSON.get("copyrightText").asText();
+        }
+
+        List<String> countItem = collectionJSON.findValuesAsText("countItmes");
+        if(! countItem.isEmpty()) {
+            collection.countItems = collectionJSON.get("countItems").asInt();
+        }
+
         //@TODO Is it comm.introductoryText and coll.introText ?
-        collection.introText = collectionJSON.get("introText").asText();
-        collection.shortDescription = collectionJSON.get("shortDescription").asText();
-        collection.sidebarText = collectionJSON.get("sidebarText").asText();
+        List<String> introductoryText = collectionJSON.findValuesAsText("introductoryText");
+        if(! introductoryText.isEmpty()) {
+            collection.introText = introductoryText.get(0);
+        }
+
+        List<String> shortDescription = collectionJSON.findValuesAsText("shortDescription");
+        if(! shortDescription.isEmpty()) {
+            collection.shortDescription = shortDescription.get(0);
+        }
+
+        List<String> sidebarText = collectionJSON.findValuesAsText("sidebarText");
+        if(! sidebarText.isEmpty()) {
+            collection.sidebarText = sidebarText.get(0);
+        }
+
 
         //Not sure what communities means for an item. Its parents?
         JsonNode commNodes = collectionJSON.get("communities");
-        for(JsonNode comm : commNodes) {
-            collection.communities.add(comm.get("communityID").asInt());
+        if(commNodes != null) {
+            for(JsonNode comm : commNodes) {
+                collection.communities.add(comm.get("communityID").asInt());
+            }
         }
 
         JsonNode itemNodes = collectionJSON.get("items");
-        for(JsonNode item : itemNodes) {
-            collection.items.add(item.get("itemID").asInt());
+        if(itemNodes != null) {
+            for(JsonNode item : itemNodes) {
+                collection.items.add(item.get("itemID").asInt());
+            }
         }
 
 
