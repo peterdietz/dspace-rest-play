@@ -292,10 +292,7 @@ public class Application extends Controller {
         Collection collection = new Collection();
 
         collection.id = collectionJSON.get("collectionID").asLong();
-        List<String> names = collectionJSON.findValuesAsText("name");
-        collection.name = names.get(0);
-
-        //List<String> handle = collectionJSON.findValuesAsText("handle");
+        collection.name = collectionJSON.get("name").asText();
         collection.handle = collectionJSON.get("handle").asText();
 
         List<String> copyrightText = collectionJSON.findValuesAsText("copyrightText");
@@ -303,9 +300,8 @@ public class Application extends Controller {
             collection.copyrightText = collectionJSON.get("copyrightText").asText();
         }
 
-        List<String> countItem = collectionJSON.findValuesAsText("countItmes");
-        if(! countItem.isEmpty()) {
-            collection.countItems = collectionJSON.get("countItems").asInt();
+        if(collectionJSON.has("numberItems")) {
+            collection.countItems = collectionJSON.get("numberItems").asInt();
         }
 
         //@TODO Is it comm.introductoryText and coll.introText ?
@@ -335,8 +331,9 @@ public class Application extends Controller {
 
         JsonNode itemNodes = collectionJSON.get("items");
         if(itemNodes != null) {
-            for(JsonNode item : itemNodes) {
-                collection.items.add(item.get("itemID").asInt());
+            for(JsonNode itemNode : itemNodes) {
+                Item item = parseItemFromJSON(itemNode);
+                collection.items.add(item);
             }
         }
 
@@ -347,32 +344,40 @@ public class Application extends Controller {
     private static Item parseItemFromJSON(JsonNode itemNode) {
         Item item = new Item();
 
-        item.id = itemNode.get("id").asLong();
+        item.id = itemNode.get("itemID").asLong();
         item.name = itemNode.get("name").asText();
 
         item.handle = itemNode.get("handle").asText();
-        
-        item.isArchived = itemNode.get("isArchived").asBoolean();
-        item.isWithdrawn = itemNode.get("isWithdrawn").asBoolean();
-        
-        item.submitterFullName = itemNode.get("submitter").get("fullName").asText();
 
-        JsonNode metadataNodes = itemNode.get("metadata");
-        for(JsonNode metadata : metadataNodes) {
-            String schema = metadata.get("schema").asText();
-            String element = metadata.get("element").asText();
-            String qualifier = metadata.get("qualifier").asText();
-            String value = metadata.get("value").asText();
-
-            MetadataField field = new MetadataField(schema, element, qualifier, value);
-            
-            item.metadata.add(field);
+        List<String> isArchived = itemNode.findValuesAsText("isArchived");
+        if(! isArchived.isEmpty()) {
+            item.isArchived = Boolean.getBoolean(isArchived.get(0));
         }
+
+        //item.isWithdrawn = itemNode.get("isWithdrawn").asBoolean();
         
-        JsonNode collectionNodes = itemNode.get("collections");
-        for(JsonNode collectionNode : collectionNodes) {
-            Collection collection = parseCollectionFromJSON(collectionNode);
-            item.collections.add(collection);
+        //item.submitterFullName = itemNode.get("submitter").get("fullName").asText();
+
+        if(itemNode.has("metadata")) {
+            JsonNode metadataNodes = itemNode.findValue("metadata");
+            for(JsonNode metadata : metadataNodes) {
+                String schema = metadata.get("schema").asText();
+                String element = metadata.get("element").asText();
+                String qualifier = metadata.get("qualifier").asText();
+                String value = metadata.get("value").asText();
+
+                MetadataField field = new MetadataField(schema, element, qualifier, value);
+
+                item.metadata.add(field);
+            }
+        }
+
+        if(itemNode.has("collections")) {
+            JsonNode collectionNodes = itemNode.get("collections");
+            for(JsonNode collectionNode : collectionNodes) {
+                Collection collection = parseCollectionFromJSON(collectionNode);
+                item.collections.add(collection);
+            }
         }
 
         return item;

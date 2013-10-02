@@ -9,9 +9,6 @@
 <p>@Html(collection.copyrightText)</p>
 }
 
-
-<h2>Count Items: @collection.countItems</h2>
-
 <p>Handle: <a href="http://hdl.handle.net/@collection.handle">http://hdl.handle.net/@collection.handle</a></p>
 
 @if(collection.introText) {
@@ -38,13 +35,11 @@
 </ul>
 }
 
-@if(collection.items.length > 0) {
-<h2>Items in this Collection (@collection.countItems)</h2>
+<h2>This collection has @collection.countItems items.</h2>
 <ul>
-    @for(itemID <- collection.items) {
-    <li><a href="/item/@itemID">Item ID: @itemID</a></li>
+    @for(item <- collection.items) {
+      <li><a href="/item/@item.id">@item.name</a></li>
     }
 </ul>
-}
 
 }

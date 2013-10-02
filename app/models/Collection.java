@@ -24,7 +24,7 @@ public class Collection {
     public String handle, introText, license, provenance, shortDescription, sidebarText, copyrightText;
     public Integer countItems;
 
-    public List<Integer> items = new ArrayList<Integer>();
+    public List<Item> items = new ArrayList<Item>();
     public List<Integer> communities = new ArrayList<Integer>();
     
 }
