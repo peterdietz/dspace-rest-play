@@ -17,7 +17,7 @@ import java.util.List;
 
 
 public class Application extends Controller {
-  private static String baseRestUrl = "http://localhost:8080/rest/";
+  public static String baseRestUrl = "http://localhost:8080/rest";
 
   
   public static Result index() {
@@ -397,6 +397,7 @@ public class Application extends Controller {
         bitstream.format = bitstreamNode.get("format").asText();
         bitstream.bundleName = bitstreamNode.get("bundleName").asText();
         bitstream.sizeBytes = bitstreamNode.get("sizeBytes").asText();
+        bitstream.retrieveLink = bitstreamNode.get("retrieveLink").asText();
 
         return bitstream;
     }
@@ -404,7 +405,7 @@ public class Application extends Controller {
 
     private static HttpURLConnection connectToURL(String endpoint) throws IOException {
         HttpURLConnection conn;
-        URL url = new URL(baseRestUrl + endpoint);
+        URL url = new URL(baseRestUrl + "/" + endpoint);
 
         conn = (HttpURLConnection) url.openConnection();
         conn.setRequestMethod("GET");
