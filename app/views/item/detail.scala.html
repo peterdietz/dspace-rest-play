@@ -33,7 +33,12 @@
 <h2>Bitstreams</h2>
 <ul>
     @for(bitstream <- item.bitstreams) {
-        <li><a href="@(Application.baseRestUrl)@(bitstream.retrieveLink)">@bitstream.bundleName - @bitstream.name [@bitstream.description, @bitstream.format,  @bitstream.sizeBytes]</a></li>
+        <li><a href="@(Application.baseRestUrl)@(bitstream.retrieveLink)">
+        @if(bitstream.mimeType == "image/jpeg") {
+            <img src="@(Application.baseRestUrl)@(bitstream.retrieveLink)" class="img-polaroid"/>
+        }
+        @bitstream.bundleName - @bitstream.name [@bitstream.description, @bitstream.format,  @bitstream.sizeBytes]
+        </a></li>
     }
 </ul>
 }

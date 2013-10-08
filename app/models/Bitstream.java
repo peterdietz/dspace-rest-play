@@ -8,5 +8,5 @@ package models;
  * To change this template use File | Settings | File Templates.
  */
 public class Bitstream {
-    public String name, description, format, bundleName, sizeBytes, retrieveLink;
+    public String name, description, format, mimeType, bundleName, sizeBytes, retrieveLink;
 }
