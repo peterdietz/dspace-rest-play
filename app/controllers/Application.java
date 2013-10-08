@@ -212,13 +212,13 @@ public class Application extends Controller {
     // type, entityReference, entityURL, entityId
 
       Community community = new Community();
-      community.id = Long.decode(communityJSON.get("communityID").toString());
+      community.id = communityJSON.get("id").asLong();
+      community.name = communityJSON.get("name").asText();
+      community.handle = communityJSON.get("handle").asText();
 
-    List<String> names = communityJSON.findValuesAsText("name");
-
+      //TODO if has(), then get()...
     List<String> copyrightText = communityJSON.findValuesAsText("copyrightText");
     List<String> countItems = communityJSON.findValuesAsText("countItems");
-    List<String> handle = communityJSON.findValuesAsText("handle");
     List<String> introductoryText = communityJSON.findValuesAsText("introductoryText");
     List<String> shortDescription = communityJSON.findValuesAsText("shortDescription");
     List<String> sidebarText = communityJSON.findValuesAsText("sidebarText");
@@ -228,7 +228,7 @@ public class Application extends Controller {
       if(subCommNodes != null) {
 
           for(JsonNode subComm : subCommNodes) {
-              if(! subComm.get("communityID").isNull()) {
+              if(subComm.has("id")) {
                 community.subCommunities.add(parseCommunityFromJSON(subComm));
               }
           }
@@ -242,8 +242,7 @@ public class Application extends Controller {
       }
 
 
-      community.name = names.get(0);
-      community.handle = handle.get(0);
+
 
       if(! copyrightText.isEmpty()) {
           community.copyrightText = copyrightText.get(0);
@@ -288,7 +287,7 @@ public class Application extends Controller {
 
         Collection collection = new Collection();
 
-        collection.id = collectionJSON.get("collectionID").asLong();
+        collection.id = collectionJSON.get("id").asLong();
         collection.name = collectionJSON.get("name").asText();
         collection.handle = collectionJSON.get("handle").asText();
 
@@ -322,7 +321,7 @@ public class Application extends Controller {
         JsonNode commNodes = collectionJSON.get("communities");
         if(commNodes != null) {
             for(JsonNode comm : commNodes) {
-                collection.communities.add(comm.get("communityID").asInt());
+                collection.communities.add(comm.get("id").asInt());
             }
         }
 
@@ -341,7 +340,7 @@ public class Application extends Controller {
     private static Item parseItemFromJSON(JsonNode itemNode) {
         Item item = new Item();
 
-        item.id = itemNode.get("itemID").asLong();
+        item.id = itemNode.get("id").asLong();
         item.name = itemNode.get("name").asText();
 
         item.handle = itemNode.get("handle").asText();
