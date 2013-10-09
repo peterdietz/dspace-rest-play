@@ -17,7 +17,8 @@ import java.util.List;
 
 
 public class Application extends Controller {
-  public static String baseRestUrl = "http://localhost:8080/rest";
+  public static String baseRestUrl = "http://ec2-75-101-213-28.compute-1.amazonaws.com:8080/rest";
+          //"http://localhost:8080/rest";
 
   
   public static Result index() {
