@@ -345,9 +345,8 @@ public class Application extends Controller {
 
         item.handle = itemNode.get("handle").asText();
 
-        List<String> isArchived = itemNode.findValuesAsText("isArchived");
-        if(! isArchived.isEmpty()) {
-            item.isArchived = Boolean.getBoolean(isArchived.get(0));
+        if(itemNode.has("archived")) {
+            item.isArchived = itemNode.get("archived").asBoolean();
         }
 
         //item.isWithdrawn = itemNode.get("isWithdrawn").asBoolean();
