@@ -292,10 +292,10 @@ public class Application extends Controller {
         collection.name = collectionJSON.get("name").asText();
         collection.handle = collectionJSON.get("handle").asText();
 
-        List<String> copyrightText = collectionJSON.findValuesAsText("copyrightText");
-        if(! copyrightText.isEmpty()) {
+        if(collectionJSON.has("copyrightText")) {
             collection.copyrightText = collectionJSON.get("copyrightText").asText();
         }
+
 
         if(collectionJSON.has("numberItems")) {
             collection.countItems = collectionJSON.get("numberItems").asInt();
@@ -356,16 +356,12 @@ public class Application extends Controller {
 
         if(itemNode.has("metadata")) {
             JsonNode metadataNode = itemNode.get("metadata");
-            if(metadataNode.has("fields")) {
-                JsonNode fields = metadataNode.get("fields");
-                //TODO parseMetadataFieldFromJSON
-                item.metadata = new ArrayList<MetadataField>();
+            item.metadata = new ArrayList<MetadataField>();
 
-                for(JsonNode field : fields) {
-                    String key = field.get("key").asText();
-                    String value = field.get("value").asText();
-                    item.metadata.add(new MetadataField(key, value));
-                }
+            for(JsonNode field : metadataNode) {
+                String key = field.get("key").asText();
+                String value = field.get("value").asText();
+                item.metadata.add(new MetadataField(key, value));
             }
         }
 
@@ -378,11 +374,19 @@ public class Application extends Controller {
             }
         }
 
-        if(itemNode.has("collections")) {
-            JsonNode collectionNodes = itemNode.get("collections");
+        if(itemNode.has("parentCollectionList")) {
+            JsonNode collectionNodes = itemNode.get("parentCollectionList");
             for(JsonNode collectionNode : collectionNodes) {
                 Collection collection = parseCollectionFromJSON(collectionNode);
                 item.collections.add(collection);
+            }
+        }
+
+        if(itemNode.has("parentCommunityList")) {
+            JsonNode communityNodes = itemNode.get("parentCommunityList");
+            for(JsonNode communityNode : communityNodes) {
+                Community community = parseCommunityFromJSON(communityNode);
+                item.communities.add(community);
             }
         }
 

@@ -2,46 +2,71 @@
 
 @main(title, message, endpoint) {
 
-<h1>@item.name</h1>
+    <h1>@item.name</h1>
 
-<p>Handle: <a href="http://hdl.handle.net/@item.handle">http://hdl.handle.net/@item.handle</a></p>
+    <p>Handle: <a href="http://hdl.handle.net/@item.handle">http://hdl.handle.net/@item.handle</a></p>
 
-@if(item.isArchived) {
-    <p>Archival Status: In Archive</p>
-} else {
-    <p>Archival Status: Not yet in archive.</p>
-}
-
-@if(item.isWithdrawn) {
-    <p>Item has been withdrawn from the repository.</p>
-}
-
-
-@if(item.metadata.size > 0) {
-<h2>Metadata of this Item</h2>
-<dl>
-    @for(metadataField <- item.metadata) {
-      <dt>@metadataField.key</dt>
-      <dd>@metadataField.value</dd>
-
-
+    @if(item.isArchived) {
+        <p>Archival Status: In Archive</p>
+    } else {
+        <p>Archival Status: Not yet in archive.</p>
     }
-</dl>
-}
 
-@if(item.bitstreams.size > 0) {
-<h2>Bitstreams</h2>
-<ul>
-    @for(bitstream <- item.bitstreams) {
-        <li><a href="@(Application.baseRestUrl)@(bitstream.retrieveLink)">
-        @if(bitstream.mimeType == "image/jpeg") {
-            <img src="@(Application.baseRestUrl)@(bitstream.retrieveLink)" class="img-polaroid"/>
+    @if(item.isWithdrawn) {
+        <p>Item has been withdrawn from the repository.</p>
+    }
+
+    <div class="row-fluid">
+        <!-- Communities -->
+        <div class="span6">
+            @if(item.communities.size > 0) {
+                <h2>Parent Communities:</h2>
+                <ul>
+                    @for(community <- item.communities) {
+                        <li><a href="/community/@community.id">@community.name</a></li>
+                    }
+                </ul>
+            }
+        </div>
+
+        <!-- Collections -->
+        <div class="span6">
+            @if(item.collections.size > 0) {
+                <h2>Parent Collection(s):</h2>
+                <ul>
+                    @for(collection <- item.collections) {
+                        <li><a href="/collection/@collection.id">@collection.name</a></li>
+                    }
+                </ul>
+            }
+        </div>
+    </div>
+
+    @if(item.bitstreams.size > 0) {
+        <h2>Bitstreams</h2>
+        <ul>
+            @for(bitstream <- item.bitstreams) {
+                <li><a href="@(Application.baseRestUrl)@(bitstream.retrieveLink)">
+                    @if(bitstream.mimeType == "image/jpeg") {
+                        <img src="@(Application.baseRestUrl)@(bitstream.retrieveLink)" class="img-polaroid"/>
+                    }
+                    @bitstream.bundleName - @bitstream.name [@bitstream.description, @bitstream.format,  @bitstream.sizeBytes]
+                </a></li>
+            }
+        </ul>
+    }
+
+
+    @if(item.metadata.size > 0) {
+    <h2>Metadata</h2>
+    <dl>
+        @for(metadataField <- item.metadata) {
+          <dt>@metadataField.key</dt>
+          <dd>@metadataField.value</dd>
+
+
         }
-        @bitstream.bundleName - @bitstream.name [@bitstream.description, @bitstream.format,  @bitstream.sizeBytes]
-        </a></li>
+    </dl>
     }
-</ul>
-}
-
 
 }

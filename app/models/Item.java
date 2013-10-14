@@ -30,6 +30,7 @@ public class Item {
     public boolean isArchived, isWithdrawn;
     public String submitterFullName;
     
-    public List collections = new ArrayList<Collection>();
+    public List<Collection> collections = new ArrayList<Collection>();
+    public List<Community>  communities = new ArrayList<Community>();
 
 }
