@@ -122,7 +122,7 @@ public class Application extends Controller {
         BufferedReader reader = null;
 
         try {
-            conn = connectToURL("collections/" + id.toString() + "?expand=all");
+            conn = connectToURL("collections/" + id.toString() + "?expand=all&limit=1000");
 
             reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
 
