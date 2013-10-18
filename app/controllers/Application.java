@@ -225,6 +225,14 @@ public class Application extends Controller {
     List<String> sidebarText = communityJSON.findValuesAsText("sidebarText");
 
 
+      JsonNode commNodes = communityJSON.get("parentCommunityList");
+      if(commNodes != null) {
+          for(JsonNode comm : commNodes) {
+              Community parentCommunity = parseCommunityFromJSON(comm);
+              community.parentCommunities.add(parentCommunity);
+          }
+      }
+
       JsonNode subCommNodes = communityJSON.get("subcommunities");
       if(subCommNodes != null) {
 
@@ -317,12 +325,11 @@ public class Application extends Controller {
             collection.sidebarText = sidebarText.get(0);
         }
 
-
-        //Not sure what communities means for an item. Its parents?
-        JsonNode commNodes = collectionJSON.get("communities");
+        JsonNode commNodes = collectionJSON.get("parentCommunityList");
         if(commNodes != null) {
             for(JsonNode comm : commNodes) {
-                collection.communities.add(comm.get("id").asInt());
+                Community community = parseCommunityFromJSON(comm);
+                collection.parentCommunities.add(community);
             }
         }
 

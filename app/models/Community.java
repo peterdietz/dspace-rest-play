@@ -16,6 +16,7 @@ public class Community {
     
     public List<Community> subCommunities = new ArrayList<Community>();
     public List<Collection> collections = new ArrayList<Collection>();
+    public List<Community> parentCommunities = new ArrayList<Community>();
 
     public String copyrightText, countItems, handle, introductoryText, shortDescription, sidebarText;
 
