@@ -2,44 +2,47 @@
 
 @main(title, message, endpoint) {
 
-<h1>@collection.name</h1>
-
-@if(collection.copyrightText) {
-<h2>Copyright Text</h2>
-<p>@Html(collection.copyrightText)</p>
-}
-
-<p>Handle: <a href="http://hdl.handle.net/@collection.handle">http://hdl.handle.net/@collection.handle</a></p>
-
-@if(collection.introText) {
-<h2>Introductory Text</h2>
-<p>@Html(collection.introText)</p>
-}
-
-@if(collection.shortDescription) {
-<h2>Short Description</h2>
-<p>@Html(collection.shortDescription)</p>
-}
-
-@if(collection.sidebarText) {
-<h2>Sidebar Text</h2>
-<p>@Html(collection.sidebarText)</p>
-}
-
-@if(collection.communities.length > 0) {
-<h2>Parent Communities of this Collection</h2>
-<ul>
-    @for(communityID <- collection.communities) {
-    <li><a href="/community/@communityID">Community ID: @communityID</a></li>
+    @if(collection.parentCommunities.size() > 0) {
+        <ul class="nav nav-list">
+            <li class="nav-header">Owning Communities</li>
+            @for(community <- collection.parentCommunities) {
+                <li><a href="/community/@community.id">@community.name</a></li>
+            }
+        </ul>
     }
-</ul>
-}
 
-<h2>This collection has @collection.countItems items.</h2>
-<ul>
-    @for(item <- collection.items) {
-      <li><a href="/item/@item.id">@item.name</a></li>
+    <h1>@collection.name</h1>
+
+    <p>Handle: <a href="http://hdl.handle.net/@collection.handle">http://hdl.handle.net/@collection.handle</a></p>
+
+
+
+    @if(collection.introText) {
+        <h2>Introductory Text</h2>
+        <p>@Html(collection.introText)</p>
     }
-</ul>
+
+    @if(collection.copyrightText) {
+        <h2>Copyright Text</h2>
+        <p>@Html(collection.copyrightText)</p>
+    }
+
+    @if(collection.shortDescription) {
+        <h2>Short Description</h2>
+        <p>@Html(collection.shortDescription)</p>
+    }
+
+    @if(collection.sidebarText) {
+        <h2>Sidebar Text</h2>
+        <p>@Html(collection.sidebarText)</p>
+    }
+
+
+    <h2>This collection has @collection.countItems items.</h2>
+    <ul>
+        @for(item <- collection.items) {
+          <li><a href="/item/@item.id">@item.name</a></li>
+        }
+    </ul>
 
 }

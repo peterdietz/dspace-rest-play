@@ -25,6 +25,6 @@ public class Collection {
     public Integer countItems;
 
     public List<Item> items = new ArrayList<Item>();
-    public List<Integer> communities = new ArrayList<Integer>();
+    public List<Community> parentCommunities = new ArrayList<Community>();
     
 }
