@@ -95,7 +95,7 @@ public class Application extends Controller {
 
           String endpoint = conn.getURL().toString();
 
-          return ok(views.html.detail.render(community, "Single Community", contentString.toString(), endpoint));
+          return ok(views.html.community.detail.render(community, "Single Community", contentString.toString(), endpoint));
           
       } catch (MalformedURLException e) {
           return badRequest(e.getMessage());
