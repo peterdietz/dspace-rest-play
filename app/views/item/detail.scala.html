@@ -2,6 +2,32 @@
 
 @main(title, message, endpoint) {
 
+    <div class="row-fluid">
+        <!-- Communities -->
+        <div class="span6">
+        @if(item.communities.size > 0) {
+            <ul class="nav nav-list">
+                <li class="nav-header">Parent Communities</li>
+                @for(community <- item.communities) {
+                    <li><a href="/community/@community.id">@community.name</a></li>
+                }
+            </ul>
+        }
+        </div>
+
+        <!-- Collections -->
+        <div class="span6">
+        @if(item.collections.size > 0) {
+            <ul class="nav nav-list">
+                <li class="nav-header">Parent Collections</li>
+                @for(collection <- item.collections) {
+                    <li><a href="/collection/@collection.id">@collection.name</a></li>
+                }
+            </ul>
+        }
+        </div>
+    </div>
+
     <h1>@item.name</h1>
 
     <p>Handle: <a href="http://hdl.handle.net/@item.handle">http://hdl.handle.net/@item.handle</a></p>
@@ -16,44 +42,27 @@
         <p>Item has been withdrawn from the repository.</p>
     }
 
-    <div class="row-fluid">
-        <!-- Communities -->
-        <div class="span6">
-            @if(item.communities.size > 0) {
-                <h2>Parent Communities:</h2>
-                <ul>
-                    @for(community <- item.communities) {
-                        <li><a href="/community/@community.id">@community.name</a></li>
-                    }
-                </ul>
-            }
-        </div>
 
-        <!-- Collections -->
-        <div class="span6">
-            @if(item.collections.size > 0) {
-                <h2>Parent Collection(s):</h2>
-                <ul>
-                    @for(collection <- item.collections) {
-                        <li><a href="/collection/@collection.id">@collection.name</a></li>
-                    }
-                </ul>
-            }
-        </div>
-    </div>
 
     @if(item.bitstreams.size > 0) {
         <h2>Bitstreams</h2>
-        <ul>
-            @for(bitstream <- item.bitstreams) {
-                <li><a href="@(Application.baseRestUrl)@(bitstream.retrieveLink)">
+        @for(bitstream <- item.bitstreams) {
+            <div class="media">
+                <a class="pull-left" href="@(Application.baseRestUrl)@(bitstream.retrieveLink)">
                     @if(bitstream.mimeType == "image/jpeg") {
-                        <img src="@(Application.baseRestUrl)@(bitstream.retrieveLink)" class="img-polaroid"/>
+                        <img class="media-object" src="@(Application.baseRestUrl)@(bitstream.retrieveLink)" />
+                    } else {
+                        <img class="media-object" src="holder.js/64x64"/>
                     }
-                    @bitstream.bundleName - @bitstream.name [@bitstream.description, @bitstream.format,  @bitstream.sizeBytes]
-                </a></li>
-            }
-        </ul>
+                </a>
+                <div class="media-body">
+                    <a href="@(Application.baseRestUrl)@(bitstream.retrieveLink)">
+                        <h4 class="media-heading">@bitstream.name</h4>
+                    </a>
+                    bundle:@bitstream.bundleName desc:@bitstream.description format:@bitstream.format size:@bitstream.sizeBytes
+                </div>
+            </div>
+        }
     }
 
 
