@@ -224,6 +224,13 @@ public class Application extends Controller {
     List<String> shortDescription = communityJSON.findValuesAsText("shortDescription");
     List<String> sidebarText = communityJSON.findValuesAsText("sidebarText");
 
+      if(communityJSON.has("logo")) {
+          JsonNode logoNode = communityJSON.get("logo");
+          if(!logoNode.isNull()) {
+            community.logo = parseBitstreamFromJSON(logoNode);
+          }
+      }
+
 
       JsonNode commNodes = communityJSON.get("parentCommunityList");
       if(commNodes != null) {
@@ -307,6 +314,13 @@ public class Application extends Controller {
 
         if(collectionJSON.has("numberItems")) {
             collection.countItems = collectionJSON.get("numberItems").asInt();
+        }
+
+        if(collectionJSON.has("logo")) {
+            JsonNode logoNode = collectionJSON.get("logo");
+            if(!logoNode.isNull()) {
+                collection.logo = parseBitstreamFromJSON(logoNode);
+            }
         }
 
         //@TODO Is it comm.introductoryText and coll.introText ?

@@ -18,6 +18,8 @@ public class Community {
     public List<Collection> collections = new ArrayList<Collection>();
     public List<Community> parentCommunities = new ArrayList<Community>();
 
+    public Bitstream logo;
+
     public String copyrightText, countItems, handle, introductoryText, shortDescription, sidebarText;
 
     public static List<Community> all() {

@@ -12,7 +12,9 @@
     }
 
 <h1>@community.name</h1>
-
+    @if(community.logo != null) {
+        <img src="@(Application.baseRestUrl)@community.logo.retrieveLink" class="img-polaroid"/>
+    }
 @if(community.copyrightText) {
     <h2>Copyright Text</h2>
     <p>@Html(community.copyrightText)</p>

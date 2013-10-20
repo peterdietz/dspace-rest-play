@@ -12,6 +12,9 @@
     }
 
     <h1>@collection.name</h1>
+    @if(collection.logo != null) {
+        <img src="@(Application.baseRestUrl)@collection.logo.retrieveLink" class="img-polaroid"/>
+    }
 
     <p>Handle: <a href="http://hdl.handle.net/@collection.handle">http://hdl.handle.net/@collection.handle</a></p>
 

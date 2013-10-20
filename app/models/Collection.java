@@ -22,6 +22,7 @@ public class Collection {
     public String name;
            
     public String handle, introText, license, provenance, shortDescription, sidebarText, copyrightText;
+    public Bitstream logo;
     public Integer countItems;
 
     public List<Item> items = new ArrayList<Item>();
