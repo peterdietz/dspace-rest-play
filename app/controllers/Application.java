@@ -421,7 +421,7 @@ public class Application extends Controller {
         bitstream.format = bitstreamNode.get("format").asText();
         bitstream.mimeType = bitstreamNode.get("mimeType").asText();
         bitstream.bundleName = bitstreamNode.get("bundleName").asText();
-        bitstream.sizeBytes = bitstreamNode.get("sizeBytes").asText();
+        bitstream.sizeBytes = bitstreamNode.get("sizeBytes").asLong();
         bitstream.retrieveLink = bitstreamNode.get("retrieveLink").asText();
 
         return bitstream;
