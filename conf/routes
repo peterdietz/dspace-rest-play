@@ -6,13 +6,13 @@
 GET     /                           controllers.Application.index()
 
 # View a community
-GET     /community/:id              controllers.Application.showCommunity(id: Long)
+GET     /community/:prefix/:id              controllers.Application.showCommunity(prefix: String, id: String)
 
 # View a collection
-GET     /collection/:id              controllers.Application.showCollection(id: Long)
+GET     /collection/:prefix/:id              controllers.Application.showCollection(prefix: String, id: String)
 
 # View an Item
-GET     /item/:id              controllers.Application.showItem(id: Long)
+GET     /item/:prefix/:id              controllers.Application.showItem(prefix: String, id: String)
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.at(path="/public", file)

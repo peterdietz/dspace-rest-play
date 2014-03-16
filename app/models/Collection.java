@@ -19,6 +19,7 @@ public class Collection {
      */
 
     public Long id;
+    public String pid;
     public String name;
            
     public String handle, introText, license, provenance, shortDescription, sidebarText, copyrightText;

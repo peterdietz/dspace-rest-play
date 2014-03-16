@@ -2,6 +2,7 @@ package controllers;
 
 import models.*;
 import org.codehaus.jackson.JsonNode;
+import play.Logger;
 import play.libs.Json;
 import play.mvc.Controller;
 import play.mvc.Result;
@@ -19,7 +20,8 @@ import java.util.List;
 public class Application extends Controller {
   //public static String baseRestUrl = "http://ec2-75-101-213-28.compute-1.amazonaws.com:8080/rest";
   //public static String baseRestUrl = "http://localhost:8080/rest";
-  public static String baseRestUrl = "http://kb.osu.edu/rest";
+  //public static String baseRestUrl = "http://kb.osu.edu/rest";
+  public static String baseRestUrl = "http://mds-demo.modrepo.org:8080/webapi";
 
   
   public static Result index() {
@@ -72,29 +74,32 @@ public class Application extends Controller {
       }
   }
 
-  public static Result showCommunity(Long id) {
+  public static Result showCommunity(String prefix, String id) {
       StringBuilder contentString = new StringBuilder();
       HttpURLConnection conn = null;
       BufferedReader reader = null;
 
       try {
-          conn = connectToURL("communities/" + id.toString() + "?expand=all");
+          conn = connectToURL("content/" + prefix.toString() + "/" + id.toString());
+          String endpoint = conn.getURL().toString();
 
-          reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-
-          String output;
-          while ((output = reader.readLine()) != null) {
-              contentString.append(output);
-          }
-
-          JsonNode comm = Json.parse(contentString.toString());
+          JsonNode comm = Json.parse(connectionToString(conn));
           Community community = new Community();
 
           if (comm.size() > 0) {
               community = parseCommunityFromJSON(comm);
+
+              //Look for more data, more api calls
+              conn = connectToURL("content/" + prefix.toString() + "/" + id.toString() + "/collections");
+              JsonNode collections = Json.parse(connectionToString(conn));
+
+              for(JsonNode collectionNode : collections) {
+                  Collection collection = parseCollectionFromJSON(collectionNode);
+                  community.collections.add(collection);
+              }
           }
 
-          String endpoint = conn.getURL().toString();
+
 
           return ok(views.html.community.detail.render(community, "Single Community", contentString.toString(), endpoint));
           
@@ -117,26 +122,40 @@ public class Application extends Controller {
       }
   }
 
-    public static Result showCollection(Long id) {
+    public static String connectionToString(HttpURLConnection connection) throws IOException{
+        BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+
+        StringBuilder contentString = new StringBuilder();
+        String output;
+        while ((output = reader.readLine()) != null) {
+            contentString.append(output);
+        }
+
+        return contentString.toString();
+    }
+
+    public static Result showCollection(String prefix, String id) {
         StringBuilder contentString = new StringBuilder();
         HttpURLConnection conn = null;
         BufferedReader reader = null;
 
         try {
-            conn = connectToURL("collections/" + id.toString() + "?expand=all");
+            conn = connectToURL("content/" + prefix.toString() + "/" + id.toString() + "?expand=all");
 
-            reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-
-            String output;
-            while ((output = reader.readLine()) != null) {
-                contentString.append(output);
-            }
-
-            JsonNode collNode = Json.parse(contentString.toString());
+            JsonNode collNode = Json.parse(connectionToString(conn));
             Collection collection = new Collection();
 
             if (collNode.size() > 0) {
                 collection = parseCollectionFromJSON(collNode);
+
+                //Look for more data, more api calls
+                conn = connectToURL("content/" + prefix.toString() + "/" + id.toString() + "/items");
+                JsonNode items = Json.parse(connectionToString(conn));
+
+                for(JsonNode itemNode : items) {
+                    Item item = parseItemFromJSON(itemNode);
+                    collection.items.add(item);
+                }
             }
 
             String endpoint = conn.getURL().toString();
@@ -161,24 +180,14 @@ public class Application extends Controller {
         }
     }
 
-    public static Result showItem(Long id) {
+    public static Result showItem(String prefix, String id) {
         StringBuilder contentString = new StringBuilder();
         HttpURLConnection conn = null;
         BufferedReader reader = null;
 
         try {
-            conn = connectToURL("items/" + id.toString() + "?expand=all");
-
-            reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-
-
-
-            String output;
-            while ((output = reader.readLine()) != null) {
-                contentString.append(output);
-            }
-
-            JsonNode node = Json.parse(contentString.toString());
+            conn = connectToURL("content/" + prefix.toString() + "/" + id.toString());
+            JsonNode node = Json.parse(connectionToString(conn));
             Item item = new Item();
 
             if (node.size() > 0) {
@@ -214,33 +223,33 @@ public class Application extends Controller {
     // type, entityReference, entityURL, entityId
 
       Community community = new Community();
-      community.id = communityJSON.get("id").asLong();
+      community.pid = communityJSON.get("pid").asText();
       community.name = communityJSON.get("name").asText();
-      community.handle = communityJSON.get("handle").asText();
+      community.handle = community.pid;
 
       //TODO if has(), then get()...
-    List<String> copyrightText = communityJSON.findValuesAsText("copyrightText");
-    List<String> countItems = communityJSON.findValuesAsText("countItems");
-    List<String> introductoryText = communityJSON.findValuesAsText("introductoryText");
-    List<String> shortDescription = communityJSON.findValuesAsText("shortDescription");
-    List<String> sidebarText = communityJSON.findValuesAsText("sidebarText");
+    //List<String> copyrightText = communityJSON.findValuesAsText("copyrightText");
+    //List<String> countItems = communityJSON.findValuesAsText("countItems");
+    //List<String> introductoryText = communityJSON.findValuesAsText("introductoryText");
+    //List<String> shortDescription = communityJSON.findValuesAsText("shortDescription");
+    //List<String> sidebarText = communityJSON.findValuesAsText("sidebarText");
 
-      if(communityJSON.has("logo")) {
-          JsonNode logoNode = communityJSON.get("logo");
-          if(!logoNode.isNull()) {
-            community.logo = parseBitstreamFromJSON(logoNode);
-          }
-      }
+    //  if(communityJSON.has("logo")) {
+    //      JsonNode logoNode = communityJSON.get("logo");
+    //      if(!logoNode.isNull()) {
+    //        community.logo = parseBitstreamFromJSON(logoNode);
+    //      }
+    //  }
 
 
-      JsonNode commNodes = communityJSON.get("parentCommunityList");
-      if(commNodes != null) {
-          for(JsonNode comm : commNodes) {
-              Community parentCommunity = parseCommunityFromJSON(comm);
-              community.parentCommunities.add(parentCommunity);
-          }
-      }
-
+    //  JsonNode commNodes = communityJSON.get("parentCommunityList");
+    //  if(commNodes != null) {
+    //      for(JsonNode comm : commNodes) {
+    //          Community parentCommunity = parseCommunityFromJSON(comm);
+    //          community.parentCommunities.add(parentCommunity);
+    //      }
+    //  }
+    /*
       JsonNode subCommNodes = communityJSON.get("subcommunities");
       if(subCommNodes != null) {
 
@@ -279,7 +288,7 @@ public class Application extends Controller {
 
       if(! sidebarText.isEmpty()) {
           community.sidebarText = sidebarText.get(0);
-      }
+      }*/
 
     return community;
   }
@@ -304,8 +313,11 @@ public class Application extends Controller {
 
         Collection collection = new Collection();
 
-        collection.id = collectionJSON.get("id").asLong();
+        collection.pid = collectionJSON.get("pid").asText();
         collection.name = collectionJSON.get("name").asText();
+        collection.handle = collection.pid;
+
+        /*
         collection.handle = collectionJSON.get("handle").asText();
 
         if(collectionJSON.has("copyrightText")) {
@@ -354,7 +366,7 @@ public class Application extends Controller {
                 Item item = parseItemFromJSON(itemNode);
                 collection.items.add(item);
             }
-        }
+        }*/
 
 
         return collection;
@@ -363,11 +375,12 @@ public class Application extends Controller {
     private static Item parseItemFromJSON(JsonNode itemNode) {
         Item item = new Item();
 
-        item.id = itemNode.get("id").asLong();
+        item.pid = itemNode.get("pid").asText();
         item.name = itemNode.get("name").asText();
 
-        item.handle = itemNode.get("handle").asText();
+        item.handle = item.pid;
 
+        /*
         if(itemNode.has("archived")) {
             item.isArchived = itemNode.get("archived").asBoolean();
         }
@@ -410,7 +423,7 @@ public class Application extends Controller {
                 Community community = parseCommunityFromJSON(communityNode);
                 item.communities.add(community);
             }
-        }
+        }*/
 
         return item;
     }
@@ -432,6 +445,7 @@ public class Application extends Controller {
     private static HttpURLConnection connectToURL(String endpoint) throws IOException {
         HttpURLConnection conn;
         URL url = new URL(baseRestUrl + "/" + endpoint);
+        Logger.info(url.toString());
 
         conn = (HttpURLConnection) url.openConnection();
         conn.setRequestMethod("GET");

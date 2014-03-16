@@ -21,6 +21,7 @@ public class Item {
      */
     
     public Long id;
+    public String pid;
     public String name;
     public List<MetadataField> metadata = new ArrayList<MetadataField>();
 

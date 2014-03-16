@@ -12,6 +12,7 @@ import java.util.List;
  */
 public class Community {
     public Long id;
+    public String pid;
     public String name;
     
     public List<Community> subCommunities = new ArrayList<Community>();
