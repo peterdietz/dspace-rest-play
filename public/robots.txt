@@ -1,0 +1,3 @@
+#This is a demo app, do not index it
+User-agent: *
+Disallow: /
