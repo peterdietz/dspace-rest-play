@@ -3,17 +3,17 @@
 # ~~~~
 
 # Home page
-GET     /                           controllers.Application.index()
+GET        /                      controllers.Application.index()
 
 # View a community
-GET     /community/:id              controllers.Application.showCommunity(id: Long)
+GET        /community/:id         controllers.Application.showCommunity(id: Long)
 
 # View a collection
-GET     /collection/:id              controllers.Application.showCollection(id: Long)
+GET        /collection/:id        controllers.Application.showCollection(id: Long)
 
 # View an Item
-GET     /item/:id              controllers.Application.showItem(id: Long)
+GET        /item/:id              controllers.Application.showItem(id: Long)
 
 # Map static resources from the /public folder to the /assets URL path
-GET     /assets/*file               controllers.Assets.at(path="/public", file)
+GET        /assets/*file          controllers.Assets.at(path="/public", file)
 GET        /robots.txt            controllers.Assets.at(path="/public", file = "robots.txt")
