@@ -61,12 +61,10 @@ public class Community {
         }
 
 
-        JsonNode commNodes = communityJSON.get("parentCommunityList");
-        if(commNodes != null) {
-            for(JsonNode comm : commNodes) {
-                Community parentCommunity = parseCommunityFromJSON(comm);
-                community.parentCommunities.add(parentCommunity);
-            }
+        JsonNode parentCommunityNode = communityJSON.get("parentCommunity");
+        if(parentCommunityNode != null && parentCommunityNode.has("id")) {
+            Community parentCommunity = Community.parseCommunityFromJSON(parentCommunityNode);
+            community.parentCommunities.add(parentCommunity);
         }
 
         JsonNode subCommNodes = communityJSON.get("subCommunities");
