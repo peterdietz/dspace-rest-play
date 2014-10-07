@@ -25,7 +25,7 @@ public class Communities extends Controller {
         BufferedReader reader = null;
 
         try {
-            conn = Application.connectToURL("communities");
+            conn = Application.connectToURL("communities/top-communities");
 
             reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
 
