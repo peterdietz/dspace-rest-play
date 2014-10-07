@@ -56,7 +56,7 @@ public class Application extends Controller {
             }
 
             if(contentString.toString().equals("REST api is running.")) {
-                return ok("SUCCESS: [" + contentString.toString() + "]");
+                return ok(views.html.test.render("SUCCESS: [" + contentString.toString() + "]", "Test", contentString.toString(), conn.getURL().toString()));
             } else {
                 return internalServerError("HMM: [" + contentString.toString() + "]");
             }
