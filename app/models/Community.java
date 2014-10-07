@@ -69,7 +69,7 @@ public class Community {
             }
         }
 
-        JsonNode subCommNodes = communityJSON.get("subcommunities");
+        JsonNode subCommNodes = communityJSON.get("subCommunities");
         if(subCommNodes != null) {
 
             for(JsonNode subComm : subCommNodes) {
