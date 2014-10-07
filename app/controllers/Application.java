@@ -8,7 +8,9 @@ import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -36,6 +38,43 @@ public class Application extends Controller {
 
     public static Result index() {
         return redirect(controllers.routes.Communities.index());
+    }
+
+    public static Result test() {
+        StringBuilder contentString = new StringBuilder();
+        HttpURLConnection conn = null;
+        BufferedReader reader = null;
+
+        try {
+            conn = Application.connectToURL("test");
+
+            reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+
+            String output;
+            while ((output = reader.readLine()) != null) {
+                contentString.append(output);
+            }
+
+            if(contentString.toString().equals("REST api is running.")) {
+                return ok("SUCCESS: [" + contentString.toString() + "]");
+            } else {
+                return internalServerError("HMM: [" + contentString.toString() + "]");
+            }
+        } catch (IOException e) {
+            return internalServerError(e.getMessage());
+        } finally {
+
+            if (reader != null) {
+                try {
+                    reader.close();
+                } catch (IOException e) {
+                }
+            }
+
+            if (conn != null) {
+                conn.disconnect();
+            }
+        }
     }
 
     public static HttpURLConnection connectToURL(String endpoint) throws IOException {

@@ -20,6 +20,7 @@ GET        /item/:id              controllers.Items.show(id: Long)
 
 ### Actions
 # Test
+GET     /test                     controllers.Application.test()
 # Login
 # Logout
 
