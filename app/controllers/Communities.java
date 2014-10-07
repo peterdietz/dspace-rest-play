@@ -48,7 +48,7 @@ public class Communities extends Controller {
             String endpoint = conn.getURL().toString();
             conn.disconnect();
 
-            return ok(views.html.index.render(communities, "Top Level Communities", contentString.toString(), endpoint));
+            return ok(views.html.community.index.render(communities, "Top Level Communities", contentString.toString(), endpoint));
 
         } catch (MalformedURLException e) {
             return badRequest("MalformedURLException: " + e.getMessage());

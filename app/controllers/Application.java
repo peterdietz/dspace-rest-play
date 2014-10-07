@@ -1,10 +1,6 @@
 package controllers;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import models.*;
-
 import play.Logger;
-import play.libs.Json;
 import play.mvc.Controller;
 import play.mvc.Result;
 
@@ -12,14 +8,10 @@ import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
 
 
 public class Application extends Controller {
@@ -42,100 +34,8 @@ public class Application extends Controller {
     }
 
 
-
-
     public static Result index() {
         return redirect(controllers.routes.Communities.index());
-    }
-
-    public static Result showCollection(Long id) {
-        StringBuilder contentString = new StringBuilder();
-        HttpURLConnection conn = null;
-        BufferedReader reader = null;
-
-        try {
-            conn = connectToURL("collections/" + id.toString() + "?expand=all");
-
-            reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-
-            String output;
-            while ((output = reader.readLine()) != null) {
-                contentString.append(output);
-            }
-
-            JsonNode collNode = Json.parse(contentString.toString());
-            Collection collection = new Collection();
-
-            if (collNode.size() > 0) {
-                collection = Collection.parseCollectionFromJSON(collNode);
-            }
-
-            String endpoint = conn.getURL().toString();
-            return ok(views.html.collection.detail.render(collection, "Single Collection", contentString.toString(), endpoint));
-
-        } catch (MalformedURLException e) {
-            return badRequest(e.getMessage());
-        } catch (IOException e) {
-            return internalServerError(e.getMessage());
-        } finally {
-
-            if (reader != null) {
-                try {
-                    reader.close();
-                } catch (IOException e) {
-                }
-            }
-
-            if (conn != null) {
-                conn.disconnect();
-            }
-        }
-    }
-
-    public static Result showItem(Long id) {
-        StringBuilder contentString = new StringBuilder();
-        HttpURLConnection conn = null;
-        BufferedReader reader = null;
-
-        try {
-            conn = connectToURL("items/" + id.toString() + "?expand=all");
-
-            reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-
-
-
-            String output;
-            while ((output = reader.readLine()) != null) {
-                contentString.append(output);
-            }
-
-            JsonNode node = Json.parse(contentString.toString());
-            Item item = new Item();
-
-            if (node.size() > 0) {
-               item = Item.parseItemFromJSON(node);
-            }
-
-            String endpoint = conn.getURL().toString();
-            return ok(views.html.item.detail.render(item, "Single Item", contentString.toString(), endpoint));
-
-        } catch (MalformedURLException e) {
-            return badRequest(e.getMessage());
-        } catch (IOException e) {
-            return internalServerError(e.getMessage());
-        } finally {
-
-            if (reader != null) {
-                try {
-                    reader.close();
-                } catch (IOException e) {
-                }
-            }
-
-            if (conn != null) {
-                conn.disconnect();
-            }
-        }
     }
 
     public static HttpURLConnection connectToURL(String endpoint) throws IOException {

@@ -6,15 +6,15 @@
 GET        /                      controllers.Application.index()
 
 ### Communities
-GET        /communities             controllers.Communities.index()
-GET        /communities/:id         controllers.Communities.show(id: Long)
+GET        /communities           controllers.Communities.index()
+GET        /communities/:id       controllers.Communities.show(id: Long)
 
 
 ### Collections
-GET        /collections/:id        controllers.Application.showCollection(id: Long)
+GET        /collections/:id       controllers.Collections.show(id: Long)
 
 ### Items
-GET        /item/:id              controllers.Application.showItem(id: Long)
+GET        /item/:id              controllers.Items.show(id: Long)
 
 ### Bitstreams
 
