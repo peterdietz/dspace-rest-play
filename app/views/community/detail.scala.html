@@ -6,7 +6,7 @@
         <ul class="nav nav-list">
             <li class="nav-header">Owning Communities</li>
             @for(parentCommunity <- community.parentCommunities) {
-                <li><a href="/community/@parentCommunity.id">@parentCommunity.name</a></li>
+                <li><a href="@routes.Communities.show(parentCommunity.id)">@parentCommunity.name</a></li>
             }
         </ul>
     }
@@ -44,7 +44,7 @@
     <h2>Communities within this Community</h2>
     <ul>
     @for(subCommunity <- community.subCommunities) {
-        <li><a href="/community/@subCommunity.id">@(subCommunity.name)</a></li>
+        <li><a href="@routes.Communities.show(subCommunity.id)">@(subCommunity.name)</a></li>
     }
     </ul>
 }
@@ -53,7 +53,7 @@
 <h2>Collections within this Community</h2>
 <ul>
     @for(collection <- community.collections) {
-    <li><a href="/collection/@collection.id">@collection.name</a></li>
+    <li><a href="@routes.Collections.show(collection.id)">@collection.name</a></li>
     }
 </ul>
 }

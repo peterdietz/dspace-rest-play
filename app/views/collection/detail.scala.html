@@ -6,7 +6,7 @@
         <ul class="nav nav-list">
             <li class="nav-header">Owning Communities</li>
             @for(community <- collection.parentCommunities) {
-                <li><a href="/community/@community.id">@community.name</a></li>
+                <li><a href="@routes.Communities.show(community.id)">@community.name</a></li>
             }
         </ul>
     }
@@ -44,7 +44,7 @@
     <h2>This collection has @collection.countItems items.</h2>
     <ul>
         @for(item <- collection.items) {
-          <li><a href="/item/@item.id">@item.name</a></li>
+          <li><a href="@routes.Items.show(item.id)">@item.name</a></li>
         }
     </ul>
 

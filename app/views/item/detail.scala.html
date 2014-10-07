@@ -9,7 +9,7 @@
             <ul class="nav nav-list">
                 <li class="nav-header">Parent Communities</li>
                 @for(community <- item.communities) {
-                    <li><a href="/community/@community.id">@community.name</a></li>
+                    <li><a href="@routes.Communities.show(community.id)">@community.name</a></li>
                 }
             </ul>
         }
@@ -21,7 +21,7 @@
             <ul class="nav nav-list">
                 <li class="nav-header">Parent Collections</li>
                 @for(collection <- item.collections) {
-                    <li><a href="/collection/@collection.id">@collection.name</a></li>
+                    <li><a href="@routes.Collections.show(collection.id)">@collection.name</a></li>
                 }
             </ul>
         }
