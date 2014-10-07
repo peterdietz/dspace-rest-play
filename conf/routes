@@ -21,8 +21,8 @@ GET        /item/:id              controllers.Items.show(id: Long)
 ### Actions
 # Test
 GET     /test                     controllers.Application.test()
-# Login
-# Logout
+GET        /login                  controllers.Application.login()
+GET        /logout                 controllers.Application.logout()
 
 # Map static resources from the /public folder to the /assets URL path
 GET        /assets/*file          controllers.Assets.at(path="/public", file)

@@ -1,5 +1,13 @@
 package controllers;
 
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.conn.ssl.AllowAllHostnameVerifier;
+import org.apache.http.conn.ssl.SSLSocketFactory;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.DefaultHttpClient;
+
 import play.Logger;
 import play.mvc.Controller;
 import play.mvc.Result;
@@ -21,6 +29,7 @@ public class Application extends Controller {
   public static String baseRestUrl = "https://localhost:8443/rest";
 
     static {
+        //TODO delete before production
         //for localhost testing only
         javax.net.ssl.HttpsURLConnection.setDefaultHostnameVerifier(
                 new javax.net.ssl.HostnameVerifier(){
@@ -77,7 +86,68 @@ public class Application extends Controller {
         }
     }
 
+    private static String token = null;
+
+    public static Result login() {
+        HttpClient httpClient = new DefaultHttpClient();
+        SSLSocketFactory sf = (SSLSocketFactory)httpClient.getConnectionManager()
+                .getSchemeRegistry().getScheme("https").getSocketFactory();
+        sf.setHostnameVerifier(new AllowAllHostnameVerifier());
+
+        try {
+            HttpPost request = new HttpPost(baseRestUrl + "/login");
+            //{"email":"admin@dspace.org","password":"s3cret"}
+            StringEntity params =new StringEntity("{\"email\":\"admin@dspace.org\",\"password\":\"s3cret\"} ");
+            request.addHeader("content-type", "application/json");
+            request.setEntity(params);
+            HttpResponse response = httpClient.execute(request);
+
+            byte[] bytes = org.h2.util.IOUtils.readBytesAndClose(response.getEntity().getContent(), 0);
+            String responseBody = new String(bytes);
+            //TODO Think about how/where to store token
+            token = responseBody;
+            return ok("token:" + responseBody);
+
+
+            // handle response here...
+        }catch (Exception ex) {
+            // handle exception here
+            Logger.error(ex.getMessage());
+            return internalServerError(ex.getMessage());
+        } finally {
+            httpClient.getConnectionManager().shutdown();
+        }
+    }
+
+    public static Result logout() {
+        HttpClient httpClient = new DefaultHttpClient();
+        SSLSocketFactory sf = (SSLSocketFactory)httpClient.getConnectionManager()
+                .getSchemeRegistry().getScheme("https").getSocketFactory();
+        sf.setHostnameVerifier(new AllowAllHostnameVerifier());
+
+        try {
+            HttpPost request = new HttpPost(baseRestUrl + "/logout");
+            request.addHeader("content-type", "application/json");
+            request.addHeader("rest-dspace-token", token);
+            HttpResponse response = httpClient.execute(request);
+
+            byte[] bytes = org.h2.util.IOUtils.readBytesAndClose(response.getEntity().getContent(), 0);
+            String responseBody = new String(bytes);
+            return ok("logout:" + responseBody);
+
+
+            // handle response here...
+        }catch (Exception ex) {
+            // handle exception here
+            Logger.error(ex.getMessage());
+            return internalServerError(ex.getMessage());
+        } finally {
+            httpClient.getConnectionManager().shutdown();
+        }
+    }
+
     public static HttpURLConnection connectToURL(String endpoint) throws IOException {
+        //TODO Delete this before production
         // Create a trust manager that does not validate certificate chains
         TrustManager[] trustAllCerts = new TrustManager[]{
                 new X509TrustManager() {
@@ -93,6 +163,7 @@ public class Application extends Controller {
                 }
         };
 
+        //TODO Delete this before production
         // Install the all-trusting trust manager
         try {
             SSLContext sc = SSLContext.getInstance("SSL");
