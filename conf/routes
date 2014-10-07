@@ -8,6 +8,8 @@ GET        /                      controllers.Application.index()
 # View a community
 GET        /community/:id         controllers.Application.showCommunity(id: Long)
 
+GET        /community             controllers.Communities.index()
+
 # View a collection
 GET        /collection/:id        controllers.Application.showCollection(id: Long)
 

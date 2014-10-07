@@ -41,7 +41,7 @@ public class Application extends Controller {
                 });
     }
 
-  
+
   public static Result index() {
       StringBuilder contentString = new StringBuilder();
       HttpURLConnection conn = null;
@@ -63,7 +63,7 @@ public class Application extends Controller {
 
           if(jsonNode.size()>0) {
               for(JsonNode comm : jsonNode) {
-                  Community community = parseCommunityFromJSON(comm);
+                  Community community = Community.parseCommunityFromJSON(comm);
                   communities.add(community);
               }
           }
@@ -111,7 +111,7 @@ public class Application extends Controller {
           Community community = new Community();
 
           if (comm.size() > 0) {
-              community = parseCommunityFromJSON(comm);
+              community = Community.parseCommunityFromJSON(comm);
           }
 
           String endpoint = conn.getURL().toString();
@@ -156,7 +156,7 @@ public class Application extends Controller {
             Collection collection = new Collection();
 
             if (collNode.size() > 0) {
-                collection = parseCollectionFromJSON(collNode);
+                collection = Collection.parseCollectionFromJSON(collNode);
             }
 
             String endpoint = conn.getURL().toString();
@@ -202,7 +202,7 @@ public class Application extends Controller {
             Item item = new Item();
 
             if (node.size() > 0) {
-               item = parseItemFromJSON(node);
+               item = Item.parseItemFromJSON(node);
             }
 
             String endpoint = conn.getURL().toString();
@@ -227,229 +227,7 @@ public class Application extends Controller {
         }
     }
 
-  private static Community parseCommunityFromJSON(JsonNode communityJSON) {
-    //Other elements include
-    // administrators, canEdit, collections, copyrightText, countItems, handle, id, introductoryText
-    // name, parentCommunity, recentSubmissions, shortDescription, sidebarText, subcommunities
-    // type, entityReference, entityURL, entityId
-
-      Community community = new Community();
-      community.id = communityJSON.get("id").asLong();
-      community.name = communityJSON.get("name").asText();
-      community.handle = communityJSON.get("handle").asText();
-
-      //TODO if has(), then get()...
-    List<String> copyrightText = communityJSON.findValuesAsText("copyrightText");
-    List<String> countItems = communityJSON.findValuesAsText("countItems");
-    List<String> introductoryText = communityJSON.findValuesAsText("introductoryText");
-    List<String> shortDescription = communityJSON.findValuesAsText("shortDescription");
-    List<String> sidebarText = communityJSON.findValuesAsText("sidebarText");
-
-      if(communityJSON.has("logo")) {
-          JsonNode logoNode = communityJSON.get("logo");
-          if(!logoNode.isNull()) {
-            community.logo = parseBitstreamFromJSON(logoNode);
-          }
-      }
-
-
-      JsonNode commNodes = communityJSON.get("parentCommunityList");
-      if(commNodes != null) {
-          for(JsonNode comm : commNodes) {
-              Community parentCommunity = parseCommunityFromJSON(comm);
-              community.parentCommunities.add(parentCommunity);
-          }
-      }
-
-      JsonNode subCommNodes = communityJSON.get("subcommunities");
-      if(subCommNodes != null) {
-
-          for(JsonNode subComm : subCommNodes) {
-              if(subComm.has("id")) {
-                community.subCommunities.add(parseCommunityFromJSON(subComm));
-              }
-          }
-      }
-
-      JsonNode subCollNodes = communityJSON.get("collections");
-      if(subCollNodes != null) {
-          for(JsonNode subColl : subCollNodes) {
-              community.collections.add(parseCollectionFromJSON(subColl));
-          }
-      }
-
-
-
-
-      if(! copyrightText.isEmpty()) {
-          community.copyrightText = copyrightText.get(0);
-      }
-
-      if(! countItems.isEmpty()) {
-          community.countItems = countItems.get(0);
-      }
-
-      if(! introductoryText.isEmpty()) {
-          community.introductoryText = introductoryText.get(0);
-      }
-
-      if(! shortDescription.isEmpty()) {
-          community.shortDescription = shortDescription.get(0);
-      }
-
-      if(! sidebarText.isEmpty()) {
-          community.sidebarText = sidebarText.get(0);
-      }
-
-    return community;
-  }
-
-    private static Collection parseCollectionFromJSON(JsonNode collectionJSON) {
-        /*communities list
-        copyrightText
-                countItems
-        handle
-                id
-        introText
-        items list ids
-                license
-        logo
-                name
-        provenance
-                shortDescription
-        sidebarText
-                type
-        entityReference, entityURL, entityId
-          */
-
-        Collection collection = new Collection();
-
-        collection.id = collectionJSON.get("id").asLong();
-        collection.name = collectionJSON.get("name").asText();
-        collection.handle = collectionJSON.get("handle").asText();
-
-        if(collectionJSON.has("copyrightText")) {
-            collection.copyrightText = collectionJSON.get("copyrightText").asText();
-        }
-
-
-        if(collectionJSON.has("numberItems")) {
-            collection.countItems = collectionJSON.get("numberItems").asInt();
-        }
-
-        if(collectionJSON.has("logo")) {
-            JsonNode logoNode = collectionJSON.get("logo");
-            if(!logoNode.isNull()) {
-                collection.logo = parseBitstreamFromJSON(logoNode);
-            }
-        }
-
-        //@TODO Is it comm.introductoryText and coll.introText ?
-        List<String> introductoryText = collectionJSON.findValuesAsText("introductoryText");
-        if(! introductoryText.isEmpty()) {
-            collection.introText = introductoryText.get(0);
-        }
-
-        List<String> shortDescription = collectionJSON.findValuesAsText("shortDescription");
-        if(! shortDescription.isEmpty()) {
-            collection.shortDescription = shortDescription.get(0);
-        }
-
-        List<String> sidebarText = collectionJSON.findValuesAsText("sidebarText");
-        if(! sidebarText.isEmpty()) {
-            collection.sidebarText = sidebarText.get(0);
-        }
-
-        JsonNode commNodes = collectionJSON.get("parentCommunityList");
-        if(commNodes != null) {
-            for(JsonNode comm : commNodes) {
-                Community community = parseCommunityFromJSON(comm);
-                collection.parentCommunities.add(community);
-            }
-        }
-
-        JsonNode itemNodes = collectionJSON.get("items");
-        if(itemNodes != null) {
-            for(JsonNode itemNode : itemNodes) {
-                Item item = parseItemFromJSON(itemNode);
-                collection.items.add(item);
-            }
-        }
-
-
-        return collection;
-    }
-
-    private static Item parseItemFromJSON(JsonNode itemNode) {
-        Item item = new Item();
-
-        item.id = itemNode.get("id").asLong();
-        item.name = itemNode.get("name").asText();
-
-        item.handle = itemNode.get("handle").asText();
-
-        if(itemNode.has("archived")) {
-            item.isArchived = itemNode.get("archived").asBoolean();
-        }
-
-        //item.isWithdrawn = itemNode.get("isWithdrawn").asBoolean();
-        
-        //item.submitterFullName = itemNode.get("submitter").get("fullName").asText();
-
-        if(itemNode.has("metadata")) {
-            JsonNode metadataNode = itemNode.get("metadata");
-            item.metadata = new ArrayList<MetadataField>();
-
-            for(JsonNode field : metadataNode) {
-                String key = field.get("key").asText();
-                String value = field.get("value").asText();
-                item.metadata.add(new MetadataField(key, value));
-            }
-        }
-
-        if(itemNode.has("bitstreams")) {
-            item.bitstreams = new ArrayList<Bitstream>();
-            JsonNode bitstreamsNode = itemNode.get("bitstreams");
-            for(JsonNode bitstreamNode : bitstreamsNode) {
-                Bitstream bitstream = parseBitstreamFromJSON(bitstreamNode);
-                item.bitstreams.add(bitstream);
-            }
-        }
-
-        if(itemNode.has("parentCollectionList")) {
-            JsonNode collectionNodes = itemNode.get("parentCollectionList");
-            for(JsonNode collectionNode : collectionNodes) {
-                Collection collection = parseCollectionFromJSON(collectionNode);
-                item.collections.add(collection);
-            }
-        }
-
-        if(itemNode.has("parentCommunityList")) {
-            JsonNode communityNodes = itemNode.get("parentCommunityList");
-            for(JsonNode communityNode : communityNodes) {
-                Community community = parseCommunityFromJSON(communityNode);
-                item.communities.add(community);
-            }
-        }
-
-        return item;
-    }
-
-    private static Bitstream parseBitstreamFromJSON(JsonNode bitstreamNode) {
-        Bitstream bitstream = new Bitstream();
-        bitstream.name = bitstreamNode.get("name").asText();
-        bitstream.description = bitstreamNode.get("description").asText();
-        bitstream.format = bitstreamNode.get("format").asText();
-        bitstream.mimeType = bitstreamNode.get("mimeType").asText();
-        bitstream.bundleName = bitstreamNode.get("bundleName").asText();
-        bitstream.sizeBytes = bitstreamNode.get("sizeBytes").asLong();
-        bitstream.retrieveLink = bitstreamNode.get("retrieveLink").asText();
-
-        return bitstream;
-    }
-
-
-    private static HttpURLConnection connectToURL(String endpoint) throws IOException {
+    public static HttpURLConnection connectToURL(String endpoint) throws IOException {
         // Create a trust manager that does not validate certificate chains
         TrustManager[] trustAllCerts = new TrustManager[]{
                 new X509TrustManager() {
@@ -474,10 +252,6 @@ public class Application extends Controller {
         }
 
         // Now you can access an https URL without having the certificate in the truststore
-        //try {
-        //    URL url = new URL("https://hostname/index.html");
-        //} catch (MalformedURLException e) {
-        //}
 
         HttpURLConnection conn;
         URL url = new URL(baseRestUrl + "/" + endpoint);
