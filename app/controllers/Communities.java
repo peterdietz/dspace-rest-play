@@ -2,6 +2,7 @@ package controllers;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import models.Community;
+import play.Logger;
 import play.libs.Json;
 import play.mvc.Controller;
 import play.mvc.Result;
@@ -51,8 +52,10 @@ public class Communities extends Controller {
             return ok(views.html.community.index.render(communities, "Top Level Communities", contentString.toString(), endpoint));
 
         } catch (MalformedURLException e) {
+            Logger.error(e.getMessage(), e);
             return badRequest("MalformedURLException: " + e.getMessage());
         } catch (IOException e) {
+            Logger.error(e.getMessage(), e);
             return internalServerError("IOException :" + e.getMessage());
         } finally {
 
