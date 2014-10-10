@@ -3,10 +3,8 @@ package models
 import com.fasterxml.jackson.databind.JsonNode
 import org.apache.commons.lang3.StringUtils
 import play.mvc.Http
-import play.mvc.Http.Session
-import play.{api, Logger}
-import play.api.libs.json.{Json, JsValue}
-import play.api.mvc
+import play.Logger
+import play.api.libs.json.Json;
 
 /**
  * Created by peterdietz on 10/9/14.

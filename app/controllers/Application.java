@@ -1,9 +1,6 @@
 package controllers;
 
-import controllers.*;
 import models.User;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.http.Header;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
@@ -12,12 +9,12 @@ import org.apache.http.conn.ssl.AllowAllHostnameVerifier;
 import org.apache.http.conn.ssl.SSLSocketFactory;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
-
 import org.apache.http.util.EntityUtils;
 import play.Logger;
+import play.data.DynamicForm;
+import play.data.Form;
 import play.libs.Json;
 import play.mvc.Controller;
-import play.mvc.Http;
 import play.mvc.Result;
 
 import javax.net.ssl.HttpsURLConnection;
@@ -30,7 +27,6 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.Arrays;
 
 
 public class Application extends Controller {
@@ -97,6 +93,16 @@ public class Application extends Controller {
         }
     }
 
+    public static Result loginForm() {
+        User user = new User();
+        user = user.getUserFromSession(session());
+        if(user == null || user.email() == null) {
+            return ok(views.html.login.render(user, "Login", "", "", ""));
+        } else {
+            return redirect(routes.Application.status());
+        }
+    }
+
     public static Result login() {
         HttpClient httpClient = new DefaultHttpClient();
         SSLSocketFactory sf = (SSLSocketFactory)httpClient.getConnectionManager()
@@ -106,7 +112,11 @@ public class Application extends Controller {
         try {
             HttpPost request = new HttpPost(baseRestUrl + "/login");
             //{"email":"admin@dspace.org","password":"s3cret"}
-            StringEntity params =new StringEntity("{\"email\":\"admin@dspace.org\",\"password\":\"s3cret\"} ");
+            //StringEntity params =new StringEntity("{\"email\":\"admin@dspace.org\",\"password\":\"s3cret\"} ");
+            DynamicForm requestData = Form.form().bindFromRequest();
+            String email = requestData.get("email");
+            String password = requestData.get("password");
+            StringEntity params =new StringEntity("{\"email\":\"" + email + "\",\"password\":\"" + password + "\"}");
             request.addHeader("content-type", "application/json");
             request.setEntity(params);
             HttpResponse response = httpClient.execute(request);
@@ -142,16 +152,9 @@ public class Application extends Controller {
             request.addHeader("Content-Type", "application/json");
             String token = session("userToken");
             request.addHeader("rest-dspace-token", token);
-            Logger.info("Logging out with token:[" + token + "]");
-            for(Header header : request.getAllHeaders()) {
-                Logger.info("["+header.getName()+"] == [" + header.getValue()+"]");
-            }
-
             HttpResponse response = httpClient.execute(request);
 
             if(response.getStatusLine().getStatusCode() == 200) {
-
-                String responseBody = EntityUtils.toString(response.getEntity());
                 session().remove("userEmail");
                 session().remove("userFullname");
                 session().clear();
@@ -160,17 +163,14 @@ public class Application extends Controller {
             } else {
                 String responseBody = EntityUtils.toString(response.getEntity());
                 Logger.info("Unsuccessful logout");
-                return unauthorized("Wrong token to logout with?" + response.getStatusLine().getStatusCode()+ responseBody);
+                return unauthorized("Wrong token to logout with, or already logged out.");
             }
 
-
-            // handle response here...
         }catch (Exception ex) {
             // handle exception here
             Logger.error(ex.getMessage());
             return internalServerError(ex.getMessage());
         } finally {
-            Logger.info("finall");
             httpClient.getConnectionManager().shutdown();
         }
     }

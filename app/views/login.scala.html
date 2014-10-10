@@ -3,6 +3,10 @@
 @main(title, message, endpoint, user) {
 
     <h1>User Login</h1>
-    <p>@login</p>
+    @helper.form(routes.Application.login, 'class -> "form", 'id -> "formLogin", 'method -> "POST") {
+        <input name="email" id="email" type="text" placeholder="Email">
+        <input name="password" id="password" type="password" placeholder="Password"><br>
+        <button type="submit" id="btnLogin" class="btn">Login</button>
+    }
 
 }
