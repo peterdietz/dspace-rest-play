@@ -2,6 +2,7 @@ package controllers;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import models.Community;
+import models.RestResponse;
 import models.User;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
@@ -89,48 +90,14 @@ public class Communities extends Controller {
     }
 
     public static Result show(Long id) {
-        StringBuilder contentString = new StringBuilder();
-        HttpURLConnection conn = null;
-        BufferedReader reader = null;
-
-        try {
-            conn = Application.connectToURL("communities/" + id.toString() + "?expand=all");
-
-            reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-
-            String output;
-            while ((output = reader.readLine()) != null) {
-                contentString.append(output);
-            }
-
-            JsonNode comm = Json.parse(contentString.toString());
-            Community community = new Community();
-
-            if (comm.size() > 0) {
-                community = Community.parseCommunityFromJSON(comm);
-            }
-
-            String endpoint = conn.getURL().toString();
+        RestResponse response = Community.findByID(id);
+        if(response.modelObject instanceof Community) {
+            Community community = (Community) response.modelObject;
             User user = new User();
             user = user.getUserFromSession(session());
-            return ok(views.html.community.detail.render(user, community, "Single Community", contentString.toString(), endpoint));
-
-        } catch (MalformedURLException e) {
-            return badRequest(e.getMessage());
-        } catch (IOException e) {
-            return internalServerError(e.getMessage());
-        } finally {
-
-            if (reader != null) {
-                try {
-                    reader.close();
-                } catch (IOException e) {
-                }
-            }
-
-            if (conn != null) {
-                conn.disconnect();
-            }
+            return ok(views.html.community.detail.render(user, community, "Single Community", response.jsonString, response.endpoint));
+        } else {
+            return internalServerError();
         }
     }
 

@@ -1,7 +1,15 @@
 package models;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import controllers.Application;
+import play.api.libs.json.JsValue;
+import play.libs.Json;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -33,6 +41,55 @@ public class Community {
 
 
     public static void delete(Long id) {
+    }
+
+    public static RestResponse findByID(Long id) {
+        StringBuilder contentString = new StringBuilder();
+        HttpURLConnection conn = null;
+        BufferedReader reader = null;
+        RestResponse restResponse = new RestResponse();
+
+        try {
+            conn = Application.connectToURL("communities/" + id.toString() + "?expand=all");
+
+            reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+
+            String output;
+            while ((output = reader.readLine()) != null) {
+                contentString.append(output);
+            }
+
+            JsonNode comm = Json.parse(contentString.toString());
+
+
+            restResponse.endpoint = conn.getURL().toString();
+
+
+            ObjectMapper mapper = new ObjectMapper();
+            String pretty = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(comm);
+            restResponse.jsonString = pretty;
+
+
+            if (comm.size() > 0) {
+                Community community = Community.parseCommunityFromJSON(comm);
+                restResponse.modelObject = community;
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            if (reader != null) {
+                try {
+                    reader.close();
+                } catch (IOException e) {
+                }
+            }
+
+            if (conn != null) {
+                conn.disconnect();
+            }
+        }
+
+        return restResponse;
     }
 
     public static Community parseCommunityFromJSON(JsonNode communityJSON) {
