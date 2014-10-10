@@ -1,15 +1,23 @@
 package controllers;
 
+import controllers.*;
+import models.User;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.http.Header;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.conn.ssl.AllowAllHostnameVerifier;
 import org.apache.http.conn.ssl.SSLSocketFactory;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 
+import org.apache.http.util.EntityUtils;
 import play.Logger;
+import play.libs.Json;
 import play.mvc.Controller;
+import play.mvc.Http;
 import play.mvc.Result;
 
 import javax.net.ssl.HttpsURLConnection;
@@ -22,11 +30,12 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Arrays;
 
 
 public class Application extends Controller {
-  //public static String baseRestUrl = "http://localhost:8080/rest";
-  public static String baseRestUrl = "https://localhost:8443/rest";
+  public static String baseRestUrl = "http://localhost:8080/rest";
+  //public static String baseRestUrl = "https://localhost:8443/rest";
 
     static {
         //TODO delete before production
@@ -65,7 +74,9 @@ public class Application extends Controller {
             }
 
             if(contentString.toString().equals("REST api is running.")) {
-                return ok(views.html.test.render("SUCCESS: [" + contentString.toString() + "]", "Test", contentString.toString(), conn.getURL().toString()));
+                User user = new User();
+                user = user.getUserFromSession(session());
+                return ok(views.html.test.render(user, "SUCCESS: [" + contentString.toString() + "]", "Test", contentString.toString(), conn.getURL().toString()));
             } else {
                 return internalServerError("HMM: [" + contentString.toString() + "]");
             }
@@ -86,8 +97,6 @@ public class Application extends Controller {
         }
     }
 
-    private static String token = null;
-
     public static Result login() {
         HttpClient httpClient = new DefaultHttpClient();
         SSLSocketFactory sf = (SSLSocketFactory)httpClient.getConnectionManager()
@@ -102,11 +111,14 @@ public class Application extends Controller {
             request.setEntity(params);
             HttpResponse response = httpClient.execute(request);
 
-            byte[] bytes = org.h2.util.IOUtils.readBytesAndClose(response.getEntity().getContent(), 0);
-            String responseBody = new String(bytes);
-            //TODO Think about how/where to store token
-            token = responseBody;
-            return ok("token:" + responseBody);
+            String responseBody = EntityUtils.toString(response.getEntity());
+            String token = responseBody;
+
+            session("userToken", token);
+            return redirect(controllers.routes.Application.status());
+            //return ok(views.html.login.render(user, "token: [" + responseBody + "]", "Test", responseBody, request.getURI().toString()));
+
+            //return ok("token:" + responseBody);
 
 
             // handle response here...
@@ -127,13 +139,29 @@ public class Application extends Controller {
 
         try {
             HttpPost request = new HttpPost(baseRestUrl + "/logout");
-            request.addHeader("content-type", "application/json");
+            request.addHeader("Content-Type", "application/json");
+            String token = session("userToken");
             request.addHeader("rest-dspace-token", token);
+            Logger.info("Logging out with token:[" + token + "]");
+            for(Header header : request.getAllHeaders()) {
+                Logger.info("["+header.getName()+"] == [" + header.getValue()+"]");
+            }
+
             HttpResponse response = httpClient.execute(request);
 
-            byte[] bytes = org.h2.util.IOUtils.readBytesAndClose(response.getEntity().getContent(), 0);
-            String responseBody = new String(bytes);
-            return ok("logout:" + responseBody);
+            if(response.getStatusLine().getStatusCode() == 200) {
+
+                String responseBody = EntityUtils.toString(response.getEntity());
+                session().remove("userEmail");
+                session().remove("userFullname");
+                session().clear();
+                Logger.info("Properly Logged Out");
+                return redirect(routes.Application.status());
+            } else {
+                String responseBody = EntityUtils.toString(response.getEntity());
+                Logger.info("Unsuccessful logout");
+                return unauthorized("Wrong token to logout with?" + response.getStatusLine().getStatusCode()+ responseBody);
+            }
 
 
             // handle response here...
@@ -142,7 +170,52 @@ public class Application extends Controller {
             Logger.error(ex.getMessage());
             return internalServerError(ex.getMessage());
         } finally {
+            Logger.info("finall");
             httpClient.getConnectionManager().shutdown();
+        }
+    }
+
+    public static Result status() {
+        HttpClient httpClient = new DefaultHttpClient();
+        SSLSocketFactory sf = (SSLSocketFactory)httpClient.getConnectionManager()
+                .getSchemeRegistry().getScheme("https").getSocketFactory();
+        sf.setHostnameVerifier(new AllowAllHostnameVerifier());
+
+        try {
+            HttpGet request = new HttpGet(baseRestUrl + "/status");
+            request.setHeader("Accept", "application/json");
+            request.addHeader("content-type", "application/json");
+            String token = session("userToken");
+            request.addHeader("rest-dspace-token", token);
+
+            HttpResponse response = httpClient.execute(request);
+            String responseBody = EntityUtils.toString(response.getEntity());
+            User user = new User();
+            user = user.parseUserFromJSON(Json.parse(responseBody));
+            setSessionFromUser(user);
+
+
+            return ok(views.html.status.render(user, "Status", responseBody, request.getURI().toString()));
+
+            // handle response here...
+        }catch (IOException ex) {
+            // handle exception here
+
+            Logger.error(ex.getMessage() + " cause:" + ex.getCause());
+            return internalServerError(ex.getMessage());
+        } finally {
+            httpClient.getConnectionManager().shutdown();
+        }
+    }
+
+
+
+    public static void setSessionFromUser(User user) {
+        if(user != null && user.email() != null && user.fullname() != null & !user.email().isEmpty() && !user.fullname().isEmpty()) {
+            Logger.info("not empty");
+            session("userEmail", user.email());
+            session("userFullname", user.fullname());
+            session("userToken", user.token());
         }
     }
 

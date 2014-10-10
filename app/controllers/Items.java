@@ -2,6 +2,7 @@ package controllers;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import models.Item;
+import models.User;
 import play.libs.Json;
 import play.mvc.Controller;
 import play.mvc.Result;
@@ -43,7 +44,9 @@ public class Items extends Controller {
             }
 
             String endpoint = conn.getURL().toString();
-            return ok(views.html.item.detail.render(item, "Single Item", contentString.toString(), endpoint));
+            User user = new User();
+            user = user.getUserFromSession(session());
+            return ok(views.html.item.detail.render(user, item, "Single Item", contentString.toString(), endpoint));
 
         } catch (MalformedURLException e) {
             return badRequest(e.getMessage());

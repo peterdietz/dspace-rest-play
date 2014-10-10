@@ -1,0 +1,13 @@
+@(user: User, title: String, message: String, endpoint: String)
+
+@main(title, message, endpoint, user) {
+
+    @if(user.email) {
+        <h1>Hello @user.fullname</h1>
+        <p>Your email is @user.email</p>
+    } else {
+        <h1>Not Logged In</h1>
+        <p>You can <a href="@routes.Application.login()">Login</a></p>
+    }
+
+}

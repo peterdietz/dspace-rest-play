@@ -1,6 +1,6 @@
-@(communities: List[Community], title: String, message: String, endpoint: String)
+@(user: User, communities: List[Community], title: String, message: String, endpoint: String)
 
-@main(title, message, endpoint) {
+@main(title, message, endpoint, user) {
 
     <h1>@communities.size() communities</h1>
     <ul>

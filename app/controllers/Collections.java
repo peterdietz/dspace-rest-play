@@ -5,6 +5,7 @@ import models.Collection;
 import play.libs.Json;
 import play.mvc.Controller;
 import play.mvc.Result;
+import models.User;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -41,8 +42,10 @@ public class Collections extends Controller {
                 collection = Collection.parseCollectionFromJSON(collNode);
             }
 
+            User user = new User();
+            user = user.getUserFromSession(session());
             String endpoint = conn.getURL().toString();
-            return ok(views.html.collection.detail.render(collection, "Single Collection", contentString.toString(), endpoint));
+            return ok(views.html.collection.detail.render(user, collection, "Single Collection", contentString.toString(), endpoint));
 
         } catch (MalformedURLException e) {
             return badRequest(e.getMessage());

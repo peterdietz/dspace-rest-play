@@ -2,6 +2,8 @@ package controllers;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import models.Community;
+import models.User;
+import org.apache.commons.lang3.StringUtils;
 import play.Logger;
 import play.libs.Json;
 import play.mvc.Controller;
@@ -49,7 +51,10 @@ public class Communities extends Controller {
             String endpoint = conn.getURL().toString();
             conn.disconnect();
 
-            return ok(views.html.community.index.render(communities, "Top Level Communities", contentString.toString(), endpoint));
+            User user = new User();
+            user = user.getUserFromSession(session());
+
+            return ok(views.html.community.index.render(user, communities, "Top Level Communities", contentString.toString(), endpoint));
 
         } catch (MalformedURLException e) {
             Logger.error(e.getMessage(), e);
@@ -95,8 +100,9 @@ public class Communities extends Controller {
             }
 
             String endpoint = conn.getURL().toString();
-
-            return ok(views.html.community.detail.render(community, "Single Community", contentString.toString(), endpoint));
+            User user = new User();
+            user = user.getUserFromSession(session());
+            return ok(views.html.community.detail.render(user, community, "Single Community", contentString.toString(), endpoint));
 
         } catch (MalformedURLException e) {
             return badRequest(e.getMessage());

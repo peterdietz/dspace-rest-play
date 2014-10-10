@@ -1,4 +1,4 @@
-@(title: String, message: String, endpoint: String)(content: Html)
+@(title: String, message: String, endpoint: String, user: User)(content: Html)
 
 <!DOCTYPE html>
 
@@ -41,7 +41,13 @@
                     </ul>
                     <ul class="nav pull-right">
                         <li class="dropdown" id="menuLogin">
-                            <a class="dropdown-toggle" href="#" data-toggle="dropdown" id="navLogin">Login</a>
+                            <a class="dropdown-toggle" href="#" data-toggle="dropdown" id="navLogin">
+                                @if(user.fullname != null) {
+                                    @user.fullname
+                                } else {
+                                    Login
+                                }
+                            </a>
                             <div class="dropdown-menu" style="padding:17px;">
                                 <form class="form" id="formLogin">
                                     <input name="username" id="username" type="text" placeholder="Username">

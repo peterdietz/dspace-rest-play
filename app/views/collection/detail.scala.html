@@ -1,6 +1,6 @@
-@(collection: models.Collection, title: String, message: String, endpoint: String)
+@(user: User, collection: models.Collection, title: String, message: String, endpoint: String)
 
-@main(title, message, endpoint) {
+@main(title, message, endpoint, user) {
 
     @if(collection.parentCommunities.size() > 0) {
         <ul class="nav nav-list">
