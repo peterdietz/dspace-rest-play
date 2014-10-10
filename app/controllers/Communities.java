@@ -3,8 +3,17 @@ package controllers;
 import com.fasterxml.jackson.databind.JsonNode;
 import models.Community;
 import models.User;
-import org.apache.commons.lang3.StringUtils;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.conn.ssl.AllowAllHostnameVerifier;
+import org.apache.http.conn.ssl.SSLSocketFactory;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.util.EntityUtils;
 import play.Logger;
+import play.data.Form;
 import play.libs.Json;
 import play.mvc.Controller;
 import play.mvc.Result;
@@ -16,6 +25,8 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.List;
+
+import static play.data.Form.form;
 
 /**
  * Created by peterdietz on 10/6/14.
@@ -121,5 +132,55 @@ public class Communities extends Controller {
                 conn.disconnect();
             }
         }
+    }
+
+    public static Result createForm() {
+        User user = new User();
+        user = user.getUserFromSession(session());
+        Form<Community> communityForm = form(Community.class);
+        return ok(views.html.community.create.render(user, communityForm, "Create Community", "", ""));
+    }
+
+    public static Result create() {
+        HttpClient httpClient = new DefaultHttpClient();
+        SSLSocketFactory sf = (SSLSocketFactory)httpClient.getConnectionManager()
+                .getSchemeRegistry().getScheme("https").getSocketFactory();
+        sf.setHostnameVerifier(new AllowAllHostnameVerifier());
+
+        try {
+            Logger.info("Creating comm");
+            HttpPost request = new HttpPost(Application.baseRestUrl + "/communities");
+            request.setHeader("Accept", "application/json");
+            request.addHeader("Content-Type", "application/json");
+            String token = session("userToken");
+            request.addHeader("rest-dspace-token", token);
+
+
+            Community community = form(Community.class).bindFromRequest().get();
+
+            StringEntity communityEntity = new StringEntity("{\"name\":\""+ community.name +"\"}");
+
+            request.setEntity(communityEntity);
+            Logger.info("ready");
+            HttpResponse response = httpClient.execute(request);
+
+            Logger.info("response: " + response.toString());
+            if(response.getStatusLine().getStatusCode() == 200) {
+                Logger.info("ok");
+                Community parsedCommunity = Community.parseCommunityFromJSON(Json.parse(EntityUtils.toString(response.getEntity())));
+                return redirect(routes.Communities.show(parsedCommunity.id));
+            } else {
+                Logger.info("not ok");
+                return badRequest();
+            }
+
+        } catch (ClientProtocolException e) {
+            Logger.error(e.getMessage());
+            e.printStackTrace();
+        } catch (IOException e) {
+            Logger.error(e.getMessage());
+            e.printStackTrace();
+        }
+        return internalServerError();
     }
 }

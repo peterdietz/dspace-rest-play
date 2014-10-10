@@ -1,0 +1,28 @@
+@(user: User, communityForm: Form[Community], title: String, message: String, endpoint: String)
+
+@main(title, message, endpoint, user) {
+    @helper.form(action = routes.Communities.create, 'class -> "form", 'id -> "communityForm", 'method -> "POST") {
+        @if(communityForm.hasGlobalErrors) {
+            <ul>
+            @communityForm.globalErrors.foreach { error =>
+                <li>error.message</li>
+            }
+            </ul>
+        }
+        <!--{"name":"Hello Comm","logo":null,"copyrightText":"","introductoryText":"","shortDescription":"","sidebarText":""}-->
+
+
+        <div class="form-group">
+            @helper.inputText(communityForm("name"))
+        </div>
+        <div class="form-group">
+            @helper.inputText(communityForm("copyrightText"))
+            @helper.inputText(communityForm("introductoryText"))
+            @helper.inputText(communityForm("shortDescription"))
+            @helper.inputText(communityForm("sidebarText"))
+        </div>
+
+        <button type="submit" class="btn btn-default">Submit</button>
+    }
+
+}

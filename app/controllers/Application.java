@@ -121,16 +121,16 @@ public class Application extends Controller {
             request.setEntity(params);
             HttpResponse response = httpClient.execute(request);
 
-            String responseBody = EntityUtils.toString(response.getEntity());
-            String token = responseBody;
+            if(response.getStatusLine().getStatusCode() == 200) {
+                String responseBody = EntityUtils.toString(response.getEntity());
+                String token = responseBody;
+                session().clear();
+                session("userToken", token);
+            } else {
+                session().clear();
+            }
 
-            session("userToken", token);
             return redirect(controllers.routes.Application.status());
-            //return ok(views.html.login.render(user, "token: [" + responseBody + "]", "Test", responseBody, request.getURI().toString()));
-
-            //return ok("token:" + responseBody);
-
-
             // handle response here...
         }catch (Exception ex) {
             // handle exception here
@@ -154,10 +154,11 @@ public class Application extends Controller {
             request.addHeader("rest-dspace-token", token);
             HttpResponse response = httpClient.execute(request);
 
+            session().remove("userEmail");
+            session().remove("userFullname");
+            session().clear();
+
             if(response.getStatusLine().getStatusCode() == 200) {
-                session().remove("userEmail");
-                session().remove("userFullname");
-                session().clear();
                 Logger.info("Properly Logged Out");
                 return redirect(routes.Application.status());
             } else {
@@ -211,8 +212,10 @@ public class Application extends Controller {
 
 
     public static void setSessionFromUser(User user) {
+        session().clear();
         if(user != null && user.email() != null && user.fullname() != null & !user.email().isEmpty() && !user.fullname().isEmpty()) {
             Logger.info("not empty");
+
             session("userEmail", user.email());
             session("userFullname", user.fullname());
             session("userToken", user.token());

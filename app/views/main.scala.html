@@ -49,8 +49,10 @@
                                 }
                             </a>
                             <div class="dropdown-menu" style="padding:17px;">
+                                <ul>
+
                                 @if(user.fullname != null) {
-                                    <a href="@routes.Application.logout()">Logout</a>
+                                    <li><a href="@routes.Application.logout()">Logout</a></li>
                                 } else {
                                     @helper.form(routes.Application.login, 'class -> "form", 'id -> "formLogin", 'method -> "POST") {
                                         <input name="email" id="email" type="text" placeholder="Email">
@@ -59,6 +61,9 @@
                                     }
                                 }
 
+                                <li><a href="@routes.Application.status()">User Status</a></li>
+
+                                </ul>
                             </div>
                         </li>
                     </ul>

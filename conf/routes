@@ -6,8 +6,10 @@
 GET        /                      controllers.Application.index()
 
 ### Communities
-GET        /communities           controllers.Communities.index()
-GET        /communities/:id       controllers.Communities.show(id: Long)
+GET         /communities            controllers.Communities.index()
+GET         /communities/create     controllers.Communities.createForm()
+POST        /communities/create     controllers.Communities.create()
+GET         /communities/:id        controllers.Communities.show(id: Long)
 
 
 ### Collections
