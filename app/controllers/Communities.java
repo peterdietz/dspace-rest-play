@@ -100,6 +100,24 @@ public class Communities extends Controller {
             return internalServerError();
         }
     }
+    public static Result editForm(Long id) {
+        User user = new User();
+        user = user.getUserFromSession(session());
+        Form<Community> communityForm = form(Community.class);
+
+        RestResponse response = Community.findByID(id);
+        if(response.modelObject instanceof Community) {
+            Community community = (Community) response.modelObject;
+            communityForm.fill(community);
+            return ok(views.html.community.edit.render(user, communityForm, "Create Community", response.jsonString, response.endpoint));
+        } else {
+            return internalServerError();
+        }
+    }
+
+    public static Result edit(Long id) {
+        return null;
+    }
 
     public static Result createForm() {
         User user = new User();

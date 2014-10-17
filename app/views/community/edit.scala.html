@@ -1,0 +1,30 @@
+@(user: User, communityForm: play.data.Form[Community], title: String, message: String, endpoint: String)
+
+@main(title, message, endpoint, user) {
+    @communityForm.get()
+    @helper.form(action = routes.Communities.edit(communityForm.get().id), 'class -> "form", 'id -> "communityForm", 'method -> "PUT") {
+        @if(communityForm.hasGlobalErrors) {
+            <ul>
+            @communityForm.globalErrors.foreach { error =>
+                <li>error.message</li>
+            }
+            </ul>
+        }
+        <!--{"name":"Hello Comm","logo":null,"copyrightText":"","introductoryText":"","shortDescription":"","sidebarText":""}-->
+
+
+
+        <div class="form-group">
+        @helper.inputText(communityForm.field("name"))
+        </div>
+        <div class="form-group">
+            @helper.inputText(communityForm.field("copyrightText"))
+            @helper.inputText(communityForm.field("introductoryText"))
+            @helper.inputText(communityForm.field("shortDescription"))
+            @helper.inputText(communityForm.field("sidebarText"))
+        </div>
+
+        <button type="submit" class="btn btn-default">Submit</button>
+    }
+
+}
