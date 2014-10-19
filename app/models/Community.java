@@ -2,7 +2,15 @@ package models;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import controllers.Application;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpPut;
+import org.apache.http.conn.ssl.AllowAllHostnameVerifier;
+import org.apache.http.conn.ssl.SSLSocketFactory;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.DefaultHttpClient;
 import play.Logger;
 import play.api.libs.json.JsValue;
 import play.libs.Json;
@@ -10,6 +18,7 @@ import play.libs.Json;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.util.ArrayList;
 import java.util.List;
@@ -84,6 +93,35 @@ public class Community {
                 conn.disconnect();
             }
         }
+        return restResponse;
+    }
+
+    public RestResponse update(String token) throws IOException {
+        //TODO insecure ssl hack
+        HttpClient httpClient = new DefaultHttpClient();
+        SSLSocketFactory sf = (SSLSocketFactory)httpClient.getConnectionManager()
+                .getSchemeRegistry().getScheme("https").getSocketFactory();
+        sf.setHostnameVerifier(new AllowAllHostnameVerifier());
+
+        HttpPut request = new HttpPut(Application.baseRestUrl + "/communities/" + this.id);
+        request.setHeader("Accept", "application/json");
+        request.addHeader("Content-Type", "application/json");
+        request.addHeader("rest-dspace-token", token);
+
+        //Only allow certain attributes... "name", "copyrightText", "introductoryText", "shortDescription", "sidebarText"
+        Logger.info("EditCommunity json: " + Json.toJson(this).toString());
+        ObjectNode jsonObjectNode = Json.newObject().put("name", this.name).put("copyrightText", this.copyrightText)
+                .put("introductoryText", this.introductoryText)
+                .put("shortDescription", this.shortDescription)
+                .put("sidebarText", this.sidebarText);
+        StringEntity stringEntity = new StringEntity(jsonObjectNode.toString());
+        Logger.info("EditCommunity certain attributes: " + jsonObjectNode.toString());
+
+        request.setEntity(stringEntity);
+        HttpResponse httpResponse = httpClient.execute(request);
+        RestResponse restResponse = new RestResponse();
+        restResponse.httpResponse = httpResponse;
+        restResponse.endpoint = request.getURI().toString();
         return restResponse;
     }
 

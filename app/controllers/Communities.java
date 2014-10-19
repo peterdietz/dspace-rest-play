@@ -148,36 +148,16 @@ public class Communities extends Controller {
                 flash("success", "No changes to community detected");
                 return redirect(routes.Communities.show(id));
             } else {
-                //RestResponse updatedCommunityResponse = Community.update(editCommunity);
-                //TODO insecure ssl hack
-                HttpClient httpClient = new DefaultHttpClient();
-                SSLSocketFactory sf = (SSLSocketFactory)httpClient.getConnectionManager()
-                        .getSchemeRegistry().getScheme("https").getSocketFactory();
-                sf.setHostnameVerifier(new AllowAllHostnameVerifier());
+                editCommunity.id = originalCommunity.id;
 
-                HttpPut request = new HttpPut(Application.baseRestUrl + "/communities/" + id);
-                request.setHeader("Accept", "application/json");
-                request.addHeader("Content-Type", "application/json");
-                request.addHeader("rest-dspace-token", session("userToken"));
-
-                //Only allow certain attributes... "name", "copyrightText", "introductoryText", "shortDescription", "sidebarText"
-                Logger.info("EditCommunity json: " + Json.toJson(editCommunity).toString());
-                ObjectNode jsonObjectNode = Json.newObject().put("name", editCommunity.name).put("copyrightText", editCommunity.copyrightText)
-                        .put("introductoryText", editCommunity.introductoryText)
-                        .put("shortDescription", editCommunity.shortDescription)
-                        .put("sidebarText", editCommunity.sidebarText);
-                StringEntity stringEntity = new StringEntity(jsonObjectNode.toString());
-                Logger.info("EditCommunity certain attributes: " + jsonObjectNode.toString());
-
-                request.setEntity(stringEntity);
-                HttpResponse response = httpClient.execute(request);
-                Logger.info("response: " + response.toString());
-                if(response.getStatusLine().getStatusCode() == 200) {
+                RestResponse restResponse = editCommunity.update(user.token());
+                HttpResponse httpResponse = restResponse.httpResponse;
+                if(httpResponse.getStatusLine().getStatusCode() == 200) {
                     Logger.info("ok");
                     flash("success", "Community has been updated.");
                     return redirect(routes.Communities.show(id));
                 } else {
-                    Logger.info("not ok");
+                    Logger.info("EditCommunity not ok: " + httpResponse.getStatusLine().getStatusCode());
                     return badRequest();
                 }
             }
