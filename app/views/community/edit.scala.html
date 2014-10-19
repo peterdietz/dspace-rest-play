@@ -1,8 +1,7 @@
 @(user: User, communityForm: play.data.Form[Community], title: String, message: String, endpoint: String)
 
 @main(title, message, endpoint, user) {
-    @communityForm.get()
-    @helper.form(action = routes.Communities.edit(communityForm.get().id), 'class -> "form", 'id -> "communityForm", 'method -> "PUT") {
+    @helper.form(action = routes.Communities.edit(communityForm.get().id), 'class -> "form", 'id -> "communityForm") {
         @if(communityForm.hasGlobalErrors) {
             <ul>
             @communityForm.globalErrors.foreach { error =>

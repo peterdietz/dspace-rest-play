@@ -3,6 +3,7 @@ package models;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import controllers.Application;
+import play.Logger;
 import play.api.libs.json.JsValue;
 import play.libs.Json;
 
@@ -51,7 +52,6 @@ public class Community {
 
         try {
             conn = Application.connectToURL("communities/" + id.toString() + "?expand=all");
-
             reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
 
             String output;
@@ -60,35 +60,30 @@ public class Community {
             }
 
             JsonNode comm = Json.parse(contentString.toString());
-
-
             restResponse.endpoint = conn.getURL().toString();
-
 
             ObjectMapper mapper = new ObjectMapper();
             String pretty = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(comm);
             restResponse.jsonString = pretty;
-
 
             if (comm.size() > 0) {
                 Community community = Community.parseCommunityFromJSON(comm);
                 restResponse.modelObject = community;
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            Logger.error(e.getMessage(), e);
         } finally {
             if (reader != null) {
                 try {
                     reader.close();
                 } catch (IOException e) {
+                    Logger.error(e.getMessage(),e);
                 }
             }
-
             if (conn != null) {
                 conn.disconnect();
             }
         }
-
         return restResponse;
     }
 

@@ -1,6 +1,9 @@
-@(user: User, community: Community, title: String, message: String, endpoint: String)
+@(user: User, community: Community, title: String, message: String, endpoint: String, flash: String)
 
 @main(title, message, endpoint, user) {
+    @if(flash) {
+        <div class="alert alert-success" role="alert">@flash</div>
+    }
 
     @if(community.parentCommunities.size() > 0) {
         <ul class="nav nav-list">

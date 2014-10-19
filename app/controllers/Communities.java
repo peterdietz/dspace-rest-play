@@ -1,6 +1,7 @@
 package controllers;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import models.Community;
 import models.RestResponse;
 import models.User;
@@ -8,6 +9,7 @@ import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpPut;
 import org.apache.http.conn.ssl.AllowAllHostnameVerifier;
 import org.apache.http.conn.ssl.SSLSocketFactory;
 import org.apache.http.entity.StringEntity;
@@ -35,6 +37,7 @@ import static play.data.Form.form;
 public class Communities extends Controller {
 
     public static Result index() {
+        Logger.info("INDEX");
         StringBuilder contentString = new StringBuilder();
         HttpURLConnection conn = null;
         BufferedReader reader = null;
@@ -90,17 +93,21 @@ public class Communities extends Controller {
     }
 
     public static Result show(Long id) {
+        Logger.info("SHOW");
         RestResponse response = Community.findByID(id);
         if(response.modelObject instanceof Community) {
             Community community = (Community) response.modelObject;
             User user = new User();
             user = user.getUserFromSession(session());
-            return ok(views.html.community.detail.render(user, community, "Single Community", response.jsonString, response.endpoint));
+
+            String flash = flash("success");
+            return ok(views.html.community.detail.render(user, community, "Single Community", response.jsonString, response.endpoint, flash));
         } else {
             return internalServerError();
         }
     }
     public static Result editForm(Long id) {
+        Logger.info("EDITFORM");
         User user = new User();
         user = user.getUserFromSession(session());
         Form<Community> communityForm = form(Community.class);
@@ -108,18 +115,82 @@ public class Communities extends Controller {
         RestResponse response = Community.findByID(id);
         if(response.modelObject instanceof Community) {
             Community community = (Community) response.modelObject;
-            communityForm.fill(community);
-            return ok(views.html.community.edit.render(user, communityForm, "Create Community", response.jsonString, response.endpoint));
+            communityForm = communityForm.fill(community);
+            return ok(views.html.community.edit.render(user, communityForm, "Edit Community", response.jsonString, response.endpoint));
         } else {
             return internalServerError();
         }
     }
 
     public static Result edit(Long id) {
-        return null;
+        Logger.info("EDIT");
+        try {
+            Logger.info("Community Edit for id:" + id);
+            User user = new User();
+            user = user.getUserFromSession(session());
+            //specify which fields are allowed to be set, to prevent against mass-assignment
+            Form<Community> filledForm = form(Community.class).bindFromRequest("name", "copyrightText", "introductoryText", "shortDescription", "sidebarText");
+            if(filledForm.hasErrors()){
+                return badRequest(views.html.community.edit.render(user, filledForm, "Edit Comm", "", ""));
+            }
+
+            Community editCommunity = filledForm.get();
+
+            //Determine if the edited community is changed from original. i.e. don't update unless necessary
+            RestResponse originalCommunityResponse = Community.findByID(id);
+            Community originalCommunity = null;
+            if(originalCommunityResponse.modelObject instanceof Community) {
+                originalCommunity = (Community) originalCommunityResponse.modelObject;
+            }
+
+            if(editCommunity.equals(originalCommunity)) {
+                Logger.info("Communities are equal, nothing to do");
+                flash("success", "No changes to community detected");
+                return redirect(routes.Communities.show(id));
+            } else {
+                //RestResponse updatedCommunityResponse = Community.update(editCommunity);
+                //TODO insecure ssl hack
+                HttpClient httpClient = new DefaultHttpClient();
+                SSLSocketFactory sf = (SSLSocketFactory)httpClient.getConnectionManager()
+                        .getSchemeRegistry().getScheme("https").getSocketFactory();
+                sf.setHostnameVerifier(new AllowAllHostnameVerifier());
+
+                HttpPut request = new HttpPut(Application.baseRestUrl + "/communities/" + id);
+                request.setHeader("Accept", "application/json");
+                request.addHeader("Content-Type", "application/json");
+                request.addHeader("rest-dspace-token", session("userToken"));
+
+                //Only allow certain attributes... "name", "copyrightText", "introductoryText", "shortDescription", "sidebarText"
+                Logger.info("EditCommunity json: " + Json.toJson(editCommunity).toString());
+                ObjectNode jsonObjectNode = Json.newObject().put("name", editCommunity.name).put("copyrightText", editCommunity.copyrightText)
+                        .put("introductoryText", editCommunity.introductoryText)
+                        .put("shortDescription", editCommunity.shortDescription)
+                        .put("sidebarText", editCommunity.sidebarText);
+                StringEntity stringEntity = new StringEntity(jsonObjectNode.toString());
+                Logger.info("EditCommunity certain attributes: " + jsonObjectNode.toString());
+
+                request.setEntity(stringEntity);
+                HttpResponse response = httpClient.execute(request);
+                Logger.info("response: " + response.toString());
+                if(response.getStatusLine().getStatusCode() == 200) {
+                    Logger.info("ok");
+                    flash("success", "Community has been updated.");
+                    return redirect(routes.Communities.show(id));
+                } else {
+                    Logger.info("not ok");
+                    return badRequest();
+                }
+            }
+        } catch (ClientProtocolException e) {
+            Logger.error(e.getMessage(), e);
+        } catch (IOException e) {
+            Logger.error(e.getMessage(), e);
+        }
+        return internalServerError();
     }
 
     public static Result createForm() {
+        Logger.info("CREATEFORM");
         User user = new User();
         user = user.getUserFromSession(session());
         Form<Community> communityForm = form(Community.class);
@@ -127,6 +198,7 @@ public class Communities extends Controller {
     }
 
     public static Result create() {
+        Logger.info("CREATE");
         HttpClient httpClient = new DefaultHttpClient();
         SSLSocketFactory sf = (SSLSocketFactory)httpClient.getConnectionManager()
                 .getSchemeRegistry().getScheme("https").getSocketFactory();

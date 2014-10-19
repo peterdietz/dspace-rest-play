@@ -6,12 +6,19 @@
 GET         /                            controllers.Application.index()
 
 ### Communities
-GET         /communities                 controllers.Communities.index()
+#create
 GET         /communities/create          controllers.Communities.createForm()
 POST        /communities/create          controllers.Communities.create()
+
+#read
+GET         /communities                 controllers.Communities.index()
 GET         /communities/:id             controllers.Communities.show(id: Long)
+
+#update (hack: post to id, since html5 form method put is gone)
 GET         /communities/:id/edit        controllers.Communities.editForm(id: Long)
-POST        /communities/:id             controllers.Communities.edit(id: Long)
+POST         /communities/:id             controllers.Communities.edit(id: Long)
+
+#delete
 
 
 
