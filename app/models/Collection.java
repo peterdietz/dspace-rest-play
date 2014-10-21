@@ -1,9 +1,29 @@
 package models;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import controllers.Application;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPut;
+import org.apache.http.conn.ssl.AllowAllHostnameVerifier;
+import org.apache.http.conn.ssl.SSLSocketFactory;
+import org.apache.http.impl.client.DefaultHttpClient;
+import play.libs.Json;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
+
+import static play.mvc.Results.badRequest;
+import static play.mvc.Results.internalServerError;
 
 /**
  * Created by IntelliJ IDEA.
@@ -29,6 +49,40 @@ public class Collection {
 
     public List<Item> items = new ArrayList<Item>();
     public List<Community> parentCommunities = new ArrayList<Community>();
+
+    public static RestResponse findByID(Long id, String token) throws IOException {
+        RestResponse restResponse = new RestResponse();
+        //TODO insecure ssl hack
+        HttpClient httpClient = new DefaultHttpClient();
+        SSLSocketFactory sf = (SSLSocketFactory)httpClient.getConnectionManager()
+                .getSchemeRegistry().getScheme("https").getSocketFactory();
+        sf.setHostnameVerifier(new AllowAllHostnameVerifier());
+
+        HttpGet request = new HttpGet(Application.baseRestUrl + "/collections/" + id + "?expand=all");
+        request.setHeader("Accept", "application/json");
+        request.addHeader("Content-Type", "application/json");
+        request.addHeader("rest-dspace-token", token);
+        HttpResponse httpResponse = httpClient.execute(request);
+
+        JsonNode collNode = Json.parse(httpResponse.getEntity().getContent());
+
+        Collection collection = new Collection();
+
+        if (collNode.size() > 0) {
+            collection = Collection.parseCollectionFromJSON(collNode);
+        }
+
+        restResponse.httpResponse = httpResponse;
+        restResponse.endpoint = request.getURI().toString();
+
+        ObjectMapper mapper = new ObjectMapper();
+        String pretty = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(collection);
+        restResponse.jsonString = pretty;
+
+        restResponse.modelObject = collection;
+
+        return restResponse;
+    }
 
 
     public static Collection parseCollectionFromJSON(JsonNode collectionJSON) {
