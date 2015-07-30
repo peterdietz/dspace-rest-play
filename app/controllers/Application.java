@@ -30,8 +30,7 @@ import java.net.URL;
 
 
 public class Application extends Controller {
-  //public static String baseRestUrl = "http://localhost:8080/rest";
-  public static String baseRestUrl = "https://demo.dspace.org/rest";
+  public static String baseRestUrl = "https://trydspace.longsight.com/rest";
 
     static {
         //TODO delete before production
