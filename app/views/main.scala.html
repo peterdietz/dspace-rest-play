@@ -2,12 +2,17 @@
 
 <!DOCTYPE html>
 
-<html>
+<html lang="en">
     <head>
+        <meta charset="utf-8"/>
+        <meta http-equiv="X-UA-COMPATIBLE" content="IE=edge"/>
+        <meta name="viewport" content="width=device-width, initial-scale=1"/>
         <title>@title</title>
 
         <!-- Le styles -->
         <link rel="stylesheet" href="@routes.Assets.at("stylesheets/bootstrap.min.css")">
+        <link rel="stylesheet" href="@routes.Assets.at("stylesheets/bootstrap-theme.min.css")">
+
         <style type="text/css">
             body {
                 padding-top: 60px;
@@ -20,21 +25,30 @@
         <link rel="shortcut icon" type="image/png" href="@routes.Assets.at("images/favicon.png")">
         <meta name="google-site-verification" content="7owwMvcKV3M8TiG2pELftMzNXuTxbspqyXqvyGeXKQ4" />
 
+        <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+        <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+        <!--[if lt IE 9]>
+          <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+          <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+        <![endif]-->
     </head>
 
     <body>
 
-    <div class="navbar navbar-fixed-top">
-        <div class="navbar-inner">
+            <!-- Fixed navbar -->
+        <nav class="navbar navbar-inverse navbar-fixed-top">
             <div class="container">
-                <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
-                    <span class="icon-bar"></span>
-                    <span class="icon-bar"></span>
-                    <span class="icon-bar"></span>
-                </a>
-                <a class="brand" href="/">DSpace Rest Play</a>
-                <div class="nav-collapse">
-                    <ul class="nav">
+                <div class="navbar-header">
+                    <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+                        <span class="sr-only">Toggle navigation</span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </button>
+                    <a class="navbar-brand" href="/">DSpace Rest Play</a>
+                </div>
+                <div id="navbar" class="navbar-collapse collapse">
+                    <ul class="nav navbar-nav">
                         <li class="active"><a href="/">Home</a></li>
                         <li><a href="https://github.com/peterdietz/dspace-rest-play">About</a></li>
                         <li><a href="https://github.com/peterdietz/dspace-rest-play/issues">Contact</a></li>
@@ -42,26 +56,26 @@
                     <ul class="nav pull-right">
                         <li class="dropdown" id="menuLogin">
                             <a class="dropdown-toggle" href="#" data-toggle="dropdown" id="navLogin">
-                                @if(user.fullname != null) {
-                                    @user.fullname
-                                } else {
-                                    Login
-                                }
+                            @if(user.fullname != null) {
+                                @user.fullname
+                            } else {
+                                Login
+                            }
                             </a>
                             <div class="dropdown-menu" style="padding:17px;">
                                 <ul>
 
-                                @if(user.fullname != null) {
-                                    <li><a href="@routes.Application.logout()">Logout</a></li>
-                                } else {
-                                    @helper.form(routes.Application.login, 'class -> "form", 'id -> "formLogin", 'method -> "POST") {
-                                        <input name="email" id="email" type="text" placeholder="Email">
-                                        <input name="password" id="password" type="password" placeholder="Password"><br>
-                                        <button type="submit" id="btnLogin" class="btn">Login</button>
+                                    @if(user.fullname != null) {
+                                        <li><a href="@routes.Application.logout()">Logout</a></li>
+                                    } else {
+                                        @helper.form(routes.Application.login, 'class -> "form", 'id -> "formLogin", 'method -> "POST") {
+                                            <input name="email" id="email" type="text" placeholder="Email">
+                                            <input name="password" id="password" type="password" placeholder="Password"><br>
+                                            <button type="submit" id="btnLogin" class="btn">Login</button>
+                                        }
                                     }
-                                }
 
-                                <li><a href="@routes.Application.status()">User Status</a></li>
+                                    <li><a href="@routes.Application.status()">User Status</a></li>
 
                                 </ul>
                             </div>
@@ -69,13 +83,14 @@
                     </ul>
                 </div><!--/.nav-collapse -->
             </div>
-        </div>
-    </div>
+        </nav>
+
+
 
     <div class="container">
 
         <!-- Main hero unit for a primary marketing message or call to action -->
-        <div class="hero-unit">
+        <div class="jumbotron">
             @content
 
             <hr/>
@@ -93,22 +108,22 @@
                     </div>
                 </div>
             </div>
-            API Endpoint: <a href="@endpoint">@endpoint</a>
+            API Endpoint: <span class="glyphicon glyphicon-link"></span> <a href="@endpoint">@endpoint</a>
 
         </div>
 
         <!-- Example row of columns -->
         <div class="row">
-            <div class="span4">
+            <div class="col-md-4">
                 <h2>DSpace REST API</h2>
-                <p>This app uses the DSpace REST API as the sole data source.</p>
+                <p>This app uses the DSpace REST API as the sole data source. It was build by Peter Dietz at Longsight to test the REST API, and to build a prototype new user interface for DSpace.</p>
             </div>
-            <div class="span4">
+            <div class="col-md-4">
                 <h2>What is this?</h2>
                 <p>This is a REST API client to DSpace. The purpose is to ensure all the functionality works.
-                <p><a class="btn" href="https://github.com/peterdietz/dspace-rest-play">View Client App Code &raquo;</a></p>
+                <p><a class="btn btn-default" href="https://github.com/peterdietz/dspace-rest-play">View Client App Code &raquo;</a></p>
             </div>
-            <div class="span4">
+            <div class="col-md-4">
                 <h2>What Works</h2>
                 <p>The commit activity is the best indicator of what's been worked on, but here's what works.
                     <ul>
@@ -116,31 +131,23 @@
                         <li>Community Page</li>
                         <li>Collection Page</li>
                         <li>Item Page</li>
+                        <li>Creating a Top-Level-Community</li>
                     </ul>
                     And what doesn't work includes searching, statistics, and Create/Edit/Delete.
                 </p>
-                <p><a class="btn" href="https://github.com/peterdietz/dspace-rest-play/commits/master">View Change Log &raquo;</a></p>
+                <p><a class="btn btn-default" href="https://github.com/peterdietz/dspace-rest-play/commits/master" role="button">View Change Log &raquo;</a></p>
             </div>
         </div>
 
         <hr>
 
         <footer>
-            <p>&copy; <a href="https://github.com/peterdietz">Peter Dietz</a> 2013-Present</p>
+            <p>Built with <span class="glyphicon glyphicon-heart" aria-hidden="true"></span> by <a href="https://github.com/peterdietz">Peter Dietz</a> and <a href="http://longsight.com">Longsight</a></p>
         </footer>
 
     </div> <!-- /container -->
 
-        <!-- Le javascript
-        ================================================== -->
-        <!-- Placed at the end of the document so the pages load faster -->
-
-        <!-- Le HTML5 shim, for IE6-8 support of HTML5 elements -->
-        <!--[if lt IE 9]>
-        <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
-        <![endif]-->
-
-        <script src="@routes.Assets.at("javascripts/jquery-1.7.1.min.js")" type="text/javascript"></script>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
         <script src="@routes.Assets.at("javascripts/bootstrap.min.js")" type="text/javascript"></script>
         <script src="@routes.Assets.at("javascripts/holder.min.js")" type="text/javascript"></script>
         <script src="https://google-code-prettify.googlecode.com/svn/loader/run_prettify.js" type="text/javascript"></script>
