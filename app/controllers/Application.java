@@ -32,23 +32,6 @@ import java.net.URL;
 public class Application extends Controller {
   public static String baseRestUrl = "https://trydspace.longsight.com/rest";
 
-    static {
-        //TODO delete before production
-        //for localhost testing only
-        javax.net.ssl.HttpsURLConnection.setDefaultHostnameVerifier(
-                new javax.net.ssl.HostnameVerifier(){
-
-                    public boolean verify(String hostname,
-                                          javax.net.ssl.SSLSession sslSession) {
-                        if (hostname.equals("localhost")) {
-                            return true;
-                        }
-                        return false;
-                    }
-                });
-    }
-
-
     public static Result index() {
         return redirect(controllers.routes.Communities.index());
     }
@@ -104,9 +87,6 @@ public class Application extends Controller {
 
     public static Result login() {
         HttpClient httpClient = new DefaultHttpClient();
-        SSLSocketFactory sf = (SSLSocketFactory)httpClient.getConnectionManager()
-                .getSchemeRegistry().getScheme("https").getSocketFactory();
-        sf.setHostnameVerifier(new AllowAllHostnameVerifier());
 
         try {
             HttpPost request = new HttpPost(baseRestUrl + "/login");
@@ -142,9 +122,6 @@ public class Application extends Controller {
 
     public static Result logout() {
         HttpClient httpClient = new DefaultHttpClient();
-        SSLSocketFactory sf = (SSLSocketFactory)httpClient.getConnectionManager()
-                .getSchemeRegistry().getScheme("https").getSocketFactory();
-        sf.setHostnameVerifier(new AllowAllHostnameVerifier());
 
         try {
             HttpPost request = new HttpPost(baseRestUrl + "/logout");
@@ -177,9 +154,6 @@ public class Application extends Controller {
 
     public static Result status() {
         HttpClient httpClient = new DefaultHttpClient();
-        SSLSocketFactory sf = (SSLSocketFactory)httpClient.getConnectionManager()
-                .getSchemeRegistry().getScheme("https").getSocketFactory();
-        sf.setHostnameVerifier(new AllowAllHostnameVerifier());
 
         try {
             HttpGet request = new HttpGet(baseRestUrl + "/status");
@@ -222,33 +196,6 @@ public class Application extends Controller {
     }
 
     public static HttpURLConnection connectToURL(String endpoint) throws IOException {
-        //TODO Delete this before production
-        // Create a trust manager that does not validate certificate chains
-        TrustManager[] trustAllCerts = new TrustManager[]{
-                new X509TrustManager() {
-                    public java.security.cert.X509Certificate[] getAcceptedIssuers() {
-                        return null;
-                    }
-                    public void checkClientTrusted(
-                            java.security.cert.X509Certificate[] certs, String authType) {
-                    }
-                    public void checkServerTrusted(
-                            java.security.cert.X509Certificate[] certs, String authType) {
-                    }
-                }
-        };
-
-        //TODO Delete this before production
-        // Install the all-trusting trust manager
-        try {
-            SSLContext sc = SSLContext.getInstance("SSL");
-            sc.init(null, trustAllCerts, new java.security.SecureRandom());
-            HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
-        } catch (Exception e) {
-        }
-
-        // Now you can access an https URL without having the certificate in the truststore
-
         HttpURLConnection conn;
         URL url = new URL(baseRestUrl + "/" + endpoint);
 
